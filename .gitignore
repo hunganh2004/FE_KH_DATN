@@ -8,7 +8,7 @@ dist-ssr/
 # Environment variables — chứa API keys, không commit
 .env
 .env.local
-.env.production
+# .env.production được commit vì chỉ chứa config public (không có secret)
 
 # Vite cache
 .vite/
