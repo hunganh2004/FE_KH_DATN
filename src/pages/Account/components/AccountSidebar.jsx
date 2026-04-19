@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { User, MapPin, ShoppingBag, Heart, Lock, Bell, LogOut } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 import clsx from 'clsx'
@@ -14,6 +14,12 @@ const NAV_ITEMS = [
 
 export default function AccountSidebar() {
   const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
 
   return (
     <aside className="w-full md:w-56 shrink-0">
@@ -44,7 +50,7 @@ export default function AccountSidebar() {
           </NavLink>
         ))}
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 w-full transition-colors"
         >
           <LogOut size={17} />

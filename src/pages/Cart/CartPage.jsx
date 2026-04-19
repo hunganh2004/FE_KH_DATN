@@ -79,7 +79,7 @@ export default function CartPage() {
                 : <span>{formatPrice(shippingFee)}</span>
               }
             </div>
-            {shippingFee > 0 && (
+            {shippingFee > 0 && subtotal < 500000 && (
               <p className="text-xs text-stone-400 mb-4 -mt-2">
                 Mua thêm {formatPrice(500000 - subtotal)} để được miễn phí ship
               </p>

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 
 // Dữ liệu từ tbl_pet_types — sẽ fetch từ API
@@ -13,11 +12,11 @@ const PET_TYPES = [
 ]
 
 export default function PetTypeFilter() {
-  const [selected, setSelected] = useState(0)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const activePetType = Number(searchParams.get('pet_type') || 0)
 
   const handleSelect = (pet) => {
-    setSelected(pet.id)
     if (pet.id === 0) {
       navigate('/search')
     } else {
@@ -35,9 +34,9 @@ export default function PetTypeFilter() {
             onClick={() => handleSelect(pet)}
             className={clsx(
               'flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border-2 transition-all shrink-0',
-              selected === pet.id
+              activePetType === pet.id
                 ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
-                : 'border-stone-200 bg-white text-stone-600 hover:border-emerald-300'
+                : 'border-stone-200 bg-white text-stone-600 hover:border-emerald-300 hover:bg-emerald-50/50'
             )}
           >
             <span className="text-2xl">{pet.icon}</span>

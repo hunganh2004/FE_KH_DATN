@@ -36,7 +36,7 @@ export default function HeroBanner() {
   const next = () => setCurrent(c => (c + 1) % SLIDES.length)
 
   return (
-    <div className="relative h-[420px] md:h-[580px] overflow-hidden bg-stone-900">
+    <div className="relative aspect-[21/9] md:aspect-[3/1] overflow-hidden bg-stone-900">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}

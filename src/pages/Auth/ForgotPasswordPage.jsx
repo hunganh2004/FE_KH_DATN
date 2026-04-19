@@ -20,6 +20,11 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
+        {/* Back to home */}
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-600 transition-colors mb-6">
+          <ArrowLeft size={15} /> Về trang chủ
+        </Link>
+
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-[22px]">🐕</div>

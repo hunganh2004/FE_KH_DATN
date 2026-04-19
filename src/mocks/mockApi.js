@@ -84,7 +84,7 @@ export const mockProductService = {
     return paginate(items, page, limit)
   },
 
-  search: async ({ q = '', pet_type, sort = 'newest', page = 1, limit = 20 } = {}) => {
+  search: async ({ q = '', pet_type, sort = 'newest', page = 1, limit = 20, price_min, price_max } = {}) => {
     await delay()
     let items = [...mockProducts]
     if (q) {
@@ -96,6 +96,8 @@ export const mockProductService = {
       )
     }
     if (pet_type) items = items.filter(p => p.pet_types.includes(Number(pet_type)))
+    if (price_min) items = items.filter(p => (p.sale_price ?? p.price) >= Number(price_min))
+    if (price_max) items = items.filter(p => (p.sale_price ?? p.price) <= Number(price_max))
     if (sort === 'price_asc') items.sort((a, b) => (a.sale_price ?? a.price) - (b.sale_price ?? b.price))
     else if (sort === 'price_desc') items.sort((a, b) => (b.sale_price ?? b.price) - (a.sale_price ?? a.price))
     return paginate(items, page, limit)

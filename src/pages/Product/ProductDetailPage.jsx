@@ -4,8 +4,10 @@ import { ShoppingCart, Heart, RefreshCw } from 'lucide-react'
 import StarRating from '@/components/ui/StarRating'
 import ProductCard from '@/components/ui/ProductCard'
 import SkeletonCard from '@/components/ui/SkeletonCard'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatPrice } from '@/utils/format'
 import { productService } from '@/services/productService'
+import { mockCategories } from '@/mocks/data'
 import useCartStore from '@/store/cartStore'
 import useAuthStore from '@/store/authStore'
 import useWishlistStore from '@/store/wishlistStore'
@@ -14,6 +16,8 @@ import clsx from 'clsx'
 import ReviewSection from './components/ReviewSection'
 import ImageGallery from './components/ImageGallery'
 import ProductSpecs from './components/ProductSpecs'
+
+const catById = Object.fromEntries(mockCategories.map(c => [c.pk_category_id, c]))
 
 export default function ProductDetailPage() {
   const { slug } = useParams()
@@ -30,6 +34,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     setLoading(true)
     productService.getDetail(slug)
       .then((data) => {
@@ -49,7 +54,53 @@ export default function ProductDetailPage() {
       .finally(() => setRecLoading(false))
   }, [product, user])
 
-  if (loading) return <div className="max-w-7xl mx-auto px-4 py-10 text-center text-stone-400">Đang tải...</div>
+  if (loading) return (
+    <div className="max-w-7xl mx-auto px-4 py-8 animate-pulse">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+        {/* Image gallery skeleton */}
+        <div className="space-y-3">
+          <div className="aspect-square bg-stone-200 rounded-xl" />
+          <div className="flex gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="w-16 h-16 bg-stone-200 rounded-lg" />
+            ))}
+          </div>
+        </div>
+        {/* Info skeleton */}
+        <div className="space-y-4">
+          <div className="h-3 bg-stone-200 rounded w-1/4" />
+          <div className="h-7 bg-stone-200 rounded w-3/4" />
+          <div className="h-7 bg-stone-200 rounded w-1/2" />
+          <div className="h-5 bg-stone-200 rounded w-1/3" />
+          <div className="h-10 bg-stone-200 rounded w-1/2" />
+          <div className="flex gap-2 mt-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-9 w-24 bg-stone-200 rounded-lg" />
+            ))}
+          </div>
+          <div className="flex gap-2 pt-4">
+            <div className="h-12 bg-stone-200 rounded-lg flex-1" />
+            <div className="h-12 w-12 bg-stone-200 rounded-lg" />
+          </div>
+        </div>
+      </div>
+      {/* Description skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-2">
+          <div className="h-5 bg-stone-200 rounded w-1/4 mb-3" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-4 bg-stone-200 rounded" style={{ width: `${85 - i * 8}%` }} />
+          ))}
+        </div>
+        <div className="space-y-2">
+          <div className="h-5 bg-stone-200 rounded w-1/3 mb-3" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-4 bg-stone-200 rounded w-full" />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
   if (!product) return <div className="max-w-7xl mx-auto px-4 py-10 text-center text-stone-400">Không tìm thấy sản phẩm.</div>
 
   const effectivePrice = selectedVariant
@@ -73,8 +124,18 @@ export default function ProductDetailPage() {
 
   const wishlisted = product ? isWishlisted(product.pk_product_id) : false
 
+  const cat = catById[product.fk_category_id]
+  const parentCat = cat?.fk_parent_id ? catById[cat.fk_parent_id] : null
+  const breadcrumbItems = [
+    { label: 'Trang chủ', to: '/' },
+    ...(parentCat ? [{ label: parentCat.name, to: `/category/${parentCat.slug}` }] : []),
+    ...(cat ? [{ label: cat.name, to: `/category/${cat.slug}` }] : []),
+    { label: product.name },
+  ]
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <Breadcrumb items={breadcrumbItems} />
       {/* Main product section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
         <ImageGallery images={product.images} />

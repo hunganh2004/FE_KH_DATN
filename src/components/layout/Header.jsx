@@ -218,7 +218,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Nav bar — navigation + categories với dropdown cha-con */}
+      {/* Nav bar — Mega Menu */}
       <nav className="border-t border-stone-100 hidden md:block">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center h-10 gap-0.5">
@@ -235,48 +235,98 @@ export default function Header() {
 
             <li className="w-px h-4 bg-stone-200 mx-1 shrink-0" />
 
-            {/* Danh mục cha — mỗi cái có dropdown con */}
-            {parentCats.map((cat) => {
-              const children = childMap[cat.pk_category_id] || []
-              const icon = CAT_ICONS[cat.slug] || '📦'
-              return (
-                <li key={cat.slug} className="relative group">
-                  <Link
-                    to={`/category/${cat.slug}`}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors"
-                  >
-                    <span className="text-sm leading-none">{icon}</span>
-                    <span>{cat.name}</span>
-                    {children.length > 0 && (
-                      <ChevronDown size={12} className="text-stone-400 group-hover:text-emerald-500 group-hover:rotate-180 transition-transform duration-200" />
-                    )}
-                  </Link>
+            {/* Nút Danh mục — Mega Menu */}
+            <li className="relative group">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors">
+                <span>Danh mục</span>
+                <ChevronDown size={14} className="text-stone-400 group-hover:text-emerald-500 group-hover:rotate-180 transition-transform duration-200" />
+              </button>
 
-                  {/* Dropdown danh mục con */}
-                  {children.length > 0 && (
-                    <div className="absolute top-full left-0 mt-0.5 min-w-[180px] bg-white border border-stone-100 rounded-xl shadow-xl py-1.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
-                      <Link
-                        to={`/category/${cat.slug}`}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors"
-                      >
-                        {icon} Tất cả {cat.name.toLowerCase()}
-                      </Link>
-                      <div className="border-t border-stone-100 my-1" />
-                      {children.map(child => (
+              {/* Mega Menu Panel */}
+              <div className="absolute top-full left-0 mt-0.5 w-[640px] bg-white border border-stone-100 rounded-2xl shadow-2xl py-5 px-6
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                              transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
+                <div className="grid grid-cols-3 gap-x-6 gap-y-1">
+                  {parentCats.map((cat) => {
+                    const children = childMap[cat.pk_category_id] || []
+                    const icon = CAT_ICONS[cat.slug] || '📦'
+                    return (
+                      <div key={cat.slug}>
+                        {/* Category cha */}
                         <Link
-                          key={child.slug}
-                          to={`/category/${child.slug}`}
-                          className="flex items-center justify-between px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                          to={`/category/${cat.slug}`}
+                          className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-emerald-50 group/cat transition-colors"
                         >
-                          <span>{child.name}</span>
-                          <span className="text-xs text-stone-400">{child.product_count}</span>
+                          <span className="text-lg leading-none">{icon}</span>
+                          <div>
+                            <p className="text-sm font-semibold text-stone-800 group-hover/cat:text-emerald-600 transition-colors leading-tight">
+                              {cat.name}
+                            </p>
+                            <p className="text-[11px] text-stone-400">{cat.product_count} sản phẩm</p>
+                          </div>
                         </Link>
-                      ))}
-                    </div>
-                  )}
-                </li>
-              )
-            })}
+                        {/* Category con */}
+                        {children.length > 0 && (
+                          <ul className="ml-9 mb-3 space-y-0.5">
+                            {children.map(child => (
+                              <li key={child.slug}>
+                                <Link
+                                  to={`/category/${child.slug}`}
+                                  className="flex items-center justify-between text-xs text-stone-500 hover:text-emerald-600 py-1 px-2 rounded-md hover:bg-emerald-50 transition-colors"
+                                >
+                                  <span>{child.name}</span>
+                                  <span className="text-stone-300">{child.product_count}</span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Footer của mega menu */}
+                <div className="border-t border-stone-100 mt-3 pt-3">
+                  <Link
+                    to="/search"
+                    className="flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 py-2 rounded-lg transition-colors"
+                  >
+                    Xem tất cả sản phẩm →
+                  </Link>
+                </div>
+              </div>
+            </li>
+
+            <li className="w-px h-4 bg-stone-200 mx-1 shrink-0" />
+
+            {/* Loại thú cưng dropdown */}
+            <li className="relative group">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors">
+                <span>Loại thú cưng</span>
+                <ChevronDown size={14} className="text-stone-400 group-hover:text-emerald-500 group-hover:rotate-180 transition-transform duration-200" />
+              </button>
+              <div className="absolute top-full left-0 mt-0.5 min-w-[160px] bg-white border border-stone-100 rounded-xl shadow-xl py-1.5
+                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                              transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
+                {[
+                  { id: 1, name: 'Chó', icon: '🐶' },
+                  { id: 2, name: 'Mèo', icon: '🐱' },
+                  { id: 3, name: 'Cá', icon: '🐟' },
+                  { id: 4, name: 'Chim', icon: '🐦' },
+                  { id: 5, name: 'Thỏ', icon: '🐰' },
+                ].map((pet) => (
+                  <Link
+                    key={pet.id}
+                    to={`/search?pet_type=${pet.id}`}
+                    className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                  >
+                    <span>{pet.icon}</span>
+                    <span>{pet.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </li>
           </ul>
         </div>
       </nav>
@@ -311,6 +361,20 @@ export default function Header() {
               </div>
             )
           })}
+          <div className="border-t border-stone-100 my-2" />
+          <p className="px-3 py-1 text-xs font-semibold text-stone-400 uppercase tracking-wider">Loại thú cưng</p>
+          {[
+            { id: 1, name: 'Chó', icon: '🐶' },
+            { id: 2, name: 'Mèo', icon: '🐱' },
+            { id: 3, name: 'Cá', icon: '🐟' },
+            { id: 4, name: 'Chim', icon: '🐦' },
+            { id: 5, name: 'Thỏ', icon: '🐰' },
+          ].map((pet) => (
+            <Link key={pet.id} to={`/search?pet_type=${pet.id}`} onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm text-stone-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
+              <span>{pet.icon}</span>{pet.name}
+            </Link>
+          ))}
         </div>
       )}
     </header>

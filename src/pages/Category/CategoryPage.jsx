@@ -4,9 +4,13 @@ import { SlidersHorizontal, X } from 'lucide-react'
 import ProductCard from '@/components/ui/ProductCard'
 import SkeletonCard from '@/components/ui/SkeletonCard'
 import Pagination from '@/components/ui/Pagination'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import FilterSidebar from './components/FilterSidebar'
 import SortBar from './components/SortBar'
 import { productService } from '@/services/productService'
+import { mockCategories } from '@/mocks/data'
+
+const catBySlug = Object.fromEntries(mockCategories.map(c => [c.slug, c]))
 
 const CATEGORY_NAMES = {
   'thuc-an':         'Thức ăn',
@@ -48,15 +52,51 @@ export default function CategoryPage() {
       .finally(() => setLoading(false))
   }, [slug, page, sort, petType, priceMin, priceMax])
 
-  const updateParam = (key, value) => {
-    const next = new URLSearchParams(searchParams)
-    if (value) next.set(key, value); else next.delete(key)
-    next.delete('page')
-    setSearchParams(next)
+  const resetFilters = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('pet_type')
+      next.delete('price_min')
+      next.delete('price_max')
+      next.delete('page')
+      return next
+    })
   }
+
+  const updateParam = (key, value) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (value) next.set(key, value); else next.delete(key)
+      if (key !== 'page') next.delete('page')
+      return next
+    })
+  }
+
+  const updatePrice = (min, max) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (min) next.set('price_min', min); else next.delete('price_min')
+      if (max) next.set('price_max', max); else next.delete('price_max')
+      next.delete('page')
+      return next
+    })
+  }
+
+  const catName = CATEGORY_NAMES[slug] || slug.replace(/-/g, ' ')
+  const currentCat = catBySlug[slug]
+  const parentCat = currentCat?.fk_parent_id
+    ? mockCategories.find(c => c.pk_category_id === currentCat.fk_parent_id)
+    : null
+
+  const breadcrumbItems = [
+    { label: 'Trang chủ', to: '/' },
+    ...(parentCat ? [{ label: parentCat.name, to: `/category/${parentCat.slug}` }] : []),
+    { label: catName },
+  ]
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
+      <Breadcrumb items={breadcrumbItems} />
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-stone-800">
           {CATEGORY_NAMES[slug] || slug.replace(/-/g, ' ')}
@@ -77,6 +117,8 @@ export default function CategoryPage() {
             priceMin={priceMin}
             priceMax={priceMax}
             onChange={updateParam}
+            onPriceChange={updatePrice}
+            onReset={resetFilters}
           />
         </aside>
 
@@ -89,14 +131,25 @@ export default function CategoryPage() {
                 <span className="font-semibold">Bộ lọc</span>
                 <button onClick={() => setShowFilter(false)}><X size={20} /></button>
               </div>
-              <FilterSidebar petType={petType} priceMin={priceMin} priceMax={priceMax} onChange={updateParam} />
+              <FilterSidebar petType={petType} priceMin={priceMin} priceMax={priceMax} onChange={updateParam} onPriceChange={updatePrice} onReset={resetFilters} />
             </div>
           </div>
         )}
 
         {/* Product grid */}
         <div className="flex-1 min-w-0">
-          <SortBar sort={sort} total={meta.total} onSortChange={(v) => updateParam('sort', v)} />
+          <SortBar
+            sort={sort}
+            total={meta.total}
+            onSortChange={(v) => updateParam('sort', v)}
+            petType={petType}
+            priceMin={priceMin}
+            priceMax={priceMax}
+            onFilterRemove={(key) => {
+              if (key === 'price') { updateParam('price_min', ''); updateParam('price_max', '') }
+              else updateParam(key, '')
+            }}
+          />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             {loading
               ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)

@@ -4,32 +4,32 @@ const CATEGORIES = [
   {
     name: 'Thức ăn', slug: 'thuc-an',
     image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&auto=format&fit=crop',
-    color: 'from-orange-400/80',
+    color: 'from-orange-500/60',
   },
   {
     name: 'Đồ chơi', slug: 'do-choi',
     image: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=400&auto=format&fit=crop',
-    color: 'from-green-500/80',
+    color: 'from-green-600/60',
   },
   {
     name: 'Phụ kiện', slug: 'phu-kien',
     image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&auto=format&fit=crop',
-    color: 'from-pink-500/80',
+    color: 'from-pink-600/60',
   },
   {
     name: 'Chăm sóc', slug: 'cham-soc',
     image: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=400&auto=format&fit=crop',
-    color: 'from-blue-500/80',
+    color: 'from-blue-600/60',
   },
   {
     name: 'Thời trang', slug: 'thoi-trang',
     image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&auto=format&fit=crop',
-    color: 'from-purple-500/80',
+    color: 'from-purple-600/60',
   },
   {
     name: 'Chuồng & Nhà', slug: 'chuong-nha',
     image: 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=400&auto=format&fit=crop',
-    color: 'from-yellow-500/80',
+    color: 'from-yellow-600/60',
   },
 ]
 
@@ -51,7 +51,7 @@ export default function FeaturedCategories() {
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             />
             <div className={`absolute inset-0 bg-gradient-to-t ${cat.color} to-transparent`} />
-            <span className="absolute bottom-2 left-0 right-0 text-center text-white text-xs font-bold drop-shadow">
+            <span className="absolute bottom-2 left-0 right-0 text-center text-white text-xs sm:text-sm font-bold drop-shadow-md px-1 leading-tight">
               {cat.name}
             </span>
           </Link>
