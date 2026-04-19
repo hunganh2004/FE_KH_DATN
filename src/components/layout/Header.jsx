@@ -249,7 +249,6 @@ export default function Header() {
                 <div className="grid grid-cols-3 gap-x-6 gap-y-1">
                   {parentCats.map((cat) => {
                     const children = childMap[cat.pk_category_id] || []
-                    const icon = CAT_ICONS[cat.slug] || '📦'
                     return (
                       <div key={cat.slug}>
                         {/* Category cha */}
@@ -257,7 +256,6 @@ export default function Header() {
                           to={`/category/${cat.slug}`}
                           className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-emerald-50 group/cat transition-colors"
                         >
-                          <span className="text-lg leading-none">{icon}</span>
                           <div>
                             <p className="text-sm font-semibold text-stone-800 group-hover/cat:text-emerald-600 transition-colors leading-tight">
                               {cat.name}
@@ -267,7 +265,7 @@ export default function Header() {
                         </Link>
                         {/* Category con */}
                         {children.length > 0 && (
-                          <ul className="ml-9 mb-3 space-y-0.5">
+                          <ul className="ml-2 mb-3 space-y-0.5">
                             {children.map(child => (
                               <li key={child.slug}>
                                 <Link
@@ -310,19 +308,18 @@ export default function Header() {
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible
                               transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
                 {[
-                  { id: 1, name: 'Chó', icon: '🐶' },
-                  { id: 2, name: 'Mèo', icon: '🐱' },
-                  { id: 3, name: 'Cá', icon: '🐟' },
-                  { id: 4, name: 'Chim', icon: '🐦' },
-                  { id: 5, name: 'Thỏ', icon: '🐰' },
+                  { id: 1, name: 'Chó' },
+                  { id: 2, name: 'Mèo' },
+                  { id: 3, name: 'Cá' },
+                  { id: 4, name: 'Chim' },
+                  { id: 5, name: 'Thỏ' },
                 ].map((pet) => (
                   <Link
                     key={pet.id}
                     to={`/search?pet_type=${pet.id}`}
-                    className="flex items-center gap-2.5 px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                    className="flex items-center px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
                   >
-                    <span>{pet.icon}</span>
-                    <span>{pet.name}</span>
+                    {pet.name}
                   </Link>
                 ))}
               </div>
