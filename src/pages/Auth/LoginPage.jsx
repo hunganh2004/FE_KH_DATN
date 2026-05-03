@@ -3,12 +3,16 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { authService } from '@/services/authService'
 import useAuthStore from '@/store/authStore'
+import useToastStore from '@/store/toastStore'
+import useCartStore from '@/store/cartStore'
+import useWishlistStore from '@/store/wishlistStore'
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { setAuth } = useAuthStore()
+  const { add: toast } = useToastStore()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
@@ -18,9 +22,16 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const data = await authService.login(form)
-      setAuth(data.user, data.token)
-      navigate(redirect)
+      const res = await authService.login(form)
+      const token = res?.data?.token ?? res?.token
+      const user = res?.data?.user ?? res?.user
+      if (token && user) {
+        setAuth(user, token)
+        toast(`Chào mừng trở lại, ${user.full_name}!`, 'success')
+        setTimeout(() => navigate(redirect), 100)
+      } else {
+        setError('Đăng nhập thất bại, vui lòng thử lại.')
+      }
     } catch (err) {
       setError(err?.message || 'Email hoặc mật khẩu không đúng.')
     } finally {
@@ -47,19 +58,6 @@ export default function LoginPage() {
         </div>
 
         <div className="card p-8">
-          {/* Demo account */}
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-5">
-            <p className="text-xs font-semibold text-emerald-700 mb-2">Tài khoản demo</p>
-            <div className="flex items-center justify-between text-xs text-stone-600 mb-1">
-              <span>Email:</span>
-              <code className="bg-white px-2 py-0.5 rounded border border-stone-200 select-all cursor-text font-mono">an.nguyen@email.com</code>
-            </div>
-            <div className="flex items-center justify-between text-xs text-stone-600">
-              <span>Mật khẩu:</span>
-              <code className="bg-white px-2 py-0.5 rounded border border-stone-200 select-all cursor-text font-mono">123456</code>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm font-medium text-stone-700 block mb-1">Email</label>

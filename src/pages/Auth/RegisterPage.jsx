@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { authService } from '@/services/authService'
 import useAuthStore from '@/store/authStore'
+import useToastStore from '@/store/toastStore'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ full_name: '', email: '', password: '', confirm: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { setAuth } = useAuthStore()
+  const { add: toast } = useToastStore()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -17,9 +19,16 @@ export default function RegisterPage() {
     if (form.password !== form.confirm) { setError('Mật khẩu xác nhận không khớp.'); return }
     setLoading(true)
     try {
-      const data = await authService.register({ full_name: form.full_name, email: form.email, password: form.password })
-      setAuth(data.user, data.token)
-      navigate('/')
+      const res = await authService.register({ full_name: form.full_name, email: form.email, password: form.password })
+      const token = res?.data?.token ?? res?.token
+      const user = res?.data?.user ?? res?.user
+      if (token && user) {
+        setAuth(user, token)
+        toast(`Chào mừng ${user.full_name}! Đăng ký thành công.`, 'success')
+        setTimeout(() => navigate('/'), 100)
+      } else {
+        navigate('/login')
+      }
     } catch (err) {
       setError(err?.message || 'Đăng ký thất bại, vui lòng thử lại.')
     } finally {

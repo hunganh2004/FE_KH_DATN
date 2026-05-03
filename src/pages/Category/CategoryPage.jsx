@@ -8,23 +8,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 import FilterSidebar from './components/FilterSidebar'
 import SortBar from './components/SortBar'
 import { productService } from '@/services/productService'
-import { mockCategories } from '@/mocks/data'
-
-const catBySlug = Object.fromEntries(mockCategories.map(c => [c.slug, c]))
-
-const CATEGORY_NAMES = {
-  'thuc-an':         'Thức ăn',
-  'thuc-an-cho-cho': 'Thức ăn cho chó',
-  'thuc-an-cho-meo': 'Thức ăn cho mèo',
-  'phu-kien':        'Phụ kiện',
-  'vong-co-day-dat': 'Vòng cổ & Dây dắt',
-  'bat-mang-an':     'Bát & Máng ăn',
-  'tui-ba-lo':       'Túi & Ba lô',
-  'do-choi':         'Đồ chơi',
-  'cham-soc':        'Vệ sinh & Chăm sóc',
-  'thoi-trang':      'Thời trang',
-  'chuong-nha':      'Chuồng & Nhà',
-}
+import useCategoryStore from '@/store/categoryStore'
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -34,23 +18,38 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(true)
   const [showFilter, setShowFilter] = useState(false)
 
+  const tree = useCategoryStore((s) => s.tree)
+  const allCats = Array.isArray(tree) ? tree.flatMap(p => [p, ...(p.children ?? [])]) : []
+  const currentCat = allCats.find(c => c.slug === slug)
+  const parentCat = currentCat?.fk_parent_id
+    ? allCats.find(c => c.pk_category_id === currentCat.fk_parent_id)
+    : null
+  const catName = currentCat?.name || slug.replace(/-/g, ' ')
+
   const page = Number(searchParams.get('page') || 1)
   const sort = searchParams.get('sort') || 'newest'
   const petType = searchParams.get('pet_type') || ''
   const priceMin = searchParams.get('price_min') || ''
   const priceMax = searchParams.get('price_max') || ''
+  const inStock = searchParams.get('in_stock') || ''
+  const subCategory = searchParams.get('sub_category') || ''
+
+  // Danh mục con của category hiện tại (nếu là cha)
+  const subCategories = currentCat ? (currentCat.children ?? []) : []
+  // Nếu đang lọc theo sub_category, dùng slug đó thay slug hiện tại
+  const effectiveSlug = subCategory || slug
 
   useEffect(() => {
     setLoading(true)
     productService
-      .getByCategory(slug, { page, sort, pet_type: petType, price_min: priceMin, price_max: priceMax, limit: 20 })
+      .getByCategory(effectiveSlug, { page, sort, pet_type: petType, price_min: priceMin, price_max: priceMax, in_stock: inStock, limit: 20 })
       .then((data) => {
         setProducts(data?.items || [])
         setMeta({ total: data?.total || 0, totalPages: data?.totalPages || 1 })
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
-  }, [slug, page, sort, petType, priceMin, priceMax])
+  }, [slug, page, sort, petType, priceMin, priceMax, inStock, subCategory])
 
   const resetFilters = () => {
     setSearchParams((prev) => {
@@ -58,6 +57,8 @@ export default function CategoryPage() {
       next.delete('pet_type')
       next.delete('price_min')
       next.delete('price_max')
+      next.delete('in_stock')
+      next.delete('sub_category')
       next.delete('page')
       return next
     })
@@ -82,12 +83,6 @@ export default function CategoryPage() {
     })
   }
 
-  const catName = CATEGORY_NAMES[slug] || slug.replace(/-/g, ' ')
-  const currentCat = catBySlug[slug]
-  const parentCat = currentCat?.fk_parent_id
-    ? mockCategories.find(c => c.pk_category_id === currentCat.fk_parent_id)
-    : null
-
   const breadcrumbItems = [
     { label: 'Trang chủ', to: '/' },
     ...(parentCat ? [{ label: parentCat.name, to: `/category/${parentCat.slug}` }] : []),
@@ -99,7 +94,7 @@ export default function CategoryPage() {
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-stone-800">
-          {CATEGORY_NAMES[slug] || slug.replace(/-/g, ' ')}
+          {catName}
         </h1>
         <button
           className="flex items-center gap-2 text-sm text-stone-600 border border-stone-200 px-3 py-1.5 rounded-lg md:hidden"
@@ -116,6 +111,9 @@ export default function CategoryPage() {
             petType={petType}
             priceMin={priceMin}
             priceMax={priceMax}
+            inStock={inStock}
+            subCategory={subCategory}
+            subCategories={subCategories}
             onChange={updateParam}
             onPriceChange={updatePrice}
             onReset={resetFilters}
@@ -131,7 +129,7 @@ export default function CategoryPage() {
                 <span className="font-semibold">Bộ lọc</span>
                 <button onClick={() => setShowFilter(false)}><X size={20} /></button>
               </div>
-              <FilterSidebar petType={petType} priceMin={priceMin} priceMax={priceMax} onChange={updateParam} onPriceChange={updatePrice} onReset={resetFilters} />
+              <FilterSidebar petType={petType} priceMin={priceMin} priceMax={priceMax} inStock={inStock} subCategory={subCategory} subCategories={subCategories} onChange={updateParam} onPriceChange={updatePrice} onReset={resetFilters} />
             </div>
           </div>
         )}
@@ -145,6 +143,8 @@ export default function CategoryPage() {
             petType={petType}
             priceMin={priceMin}
             priceMax={priceMax}
+            inStock={inStock}
+            subCategory={subCategory}
             onFilterRemove={(key) => {
               if (key === 'price') { updateParam('price_min', ''); updateParam('price_max', '') }
               else updateParam(key, '')

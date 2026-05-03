@@ -13,13 +13,16 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle 401
+// Handle 401 — chỉ redirect khi đang có token (token hết hạn), không redirect khi chưa đăng nhập
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
     if (err.response?.status === 401) {
-      useAuthStore.getState().logout()
-      window.location.href = '/login'
+      const token = useAuthStore.getState().token
+      if (token) {
+        useAuthStore.getState().logout()
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(err.response?.data || err)
   }

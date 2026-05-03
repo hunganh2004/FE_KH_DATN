@@ -9,15 +9,15 @@ export default function TrendingSection() {
 
   useEffect(() => {
     productService
-      .getList({ sort: 'trending', limit: 8 })
-      .then((data) => setProducts(data?.items || []))
+      .getList({ sort: 'created_at', order: 'DESC', limit: 8 })
+      .then((res) => setProducts(res?.items ?? []))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
   }, [])
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-stone-700 mb-4">🔥 Sản phẩm bán chạy</h2>
+      <h2 className="text-lg font-semibold text-stone-700 mb-4">🆕 Sản phẩm mới nhất</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)

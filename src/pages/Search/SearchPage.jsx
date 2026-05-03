@@ -7,10 +7,7 @@ import Pagination from '@/components/ui/Pagination'
 import SortBar from '@/pages/Category/components/SortBar'
 import FilterSidebar from '@/pages/Category/components/FilterSidebar'
 import { productService } from '@/services/productService'
-
-const PET_TYPE_NAMES = {
-  '1': 'Chó', '2': 'Mèo', '3': 'Cá', '4': 'Chim', '5': 'Thỏ',
-}
+import useCategoryStore from '@/store/categoryStore'
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -19,23 +16,27 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
 
+  const petTypes = useCategoryStore((s) => s.petTypes)
+  const petTypeMap = Object.fromEntries(petTypes.map(p => [String(p.pk_pet_type_id), p.name]))
+
   const q = searchParams.get('q') || ''
   const petType = searchParams.get('pet_type') || ''
   const priceMin = searchParams.get('price_min') || ''
   const priceMax = searchParams.get('price_max') || ''
+  const inStock = searchParams.get('in_stock') || ''
   const sort = searchParams.get('sort') || 'newest'
   const page = Number(searchParams.get('page') || 1)
 
   useEffect(() => {
     setLoading(true)
-    productService.search({ q, pet_type: petType, sort, page, price_min: priceMin, price_max: priceMax, limit: 20 })
+    productService.search({ q, pet_type: petType, sort, page, price_min: priceMin, price_max: priceMax, in_stock: inStock, limit: 20 })
       .then((data) => {
         setProducts(data?.items || [])
         setMeta({ total: data?.total || 0, totalPages: data?.totalPages || 1 })
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
-  }, [q, petType, priceMin, priceMax, sort, page])
+  }, [q, petType, priceMin, priceMax, inStock, sort, page])
 
   const updateParam = (key, value) => {
     setSearchParams((prev) => {
@@ -62,6 +63,7 @@ export default function SearchPage() {
       next.delete('pet_type')
       next.delete('price_min')
       next.delete('price_max')
+      next.delete('in_stock')
       next.delete('page')
       return next
     })
@@ -69,7 +71,7 @@ export default function SearchPage() {
 
   const getTitle = () => {
     if (q) return `Kết quả tìm kiếm: "${q}"`
-    if (petType) return `Sản phẩm dành cho ${PET_TYPE_NAMES[petType] || 'thú cưng'}`
+    if (petType) return `Sản phẩm dành cho ${petTypeMap[petType] || 'thú cưng'}`
     return 'Tất cả sản phẩm'
   }
 
@@ -78,9 +80,6 @@ export default function SearchPage() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold text-stone-800">{getTitle()}</h1>
-          {petType && (
-            <span className="text-2xl">{['🐶','🐱','🐟','🐦','🐰'][Number(petType) - 1]}</span>
-          )}
         </div>
         <button
           className="flex items-center gap-2 text-sm text-stone-600 border border-stone-200 px-3 py-1.5 rounded-lg md:hidden"
@@ -97,6 +96,7 @@ export default function SearchPage() {
             petType={petType}
             priceMin={priceMin}
             priceMax={priceMax}
+            inStock={inStock}
             onChange={updateParam}
             onPriceChange={updatePrice}
             onReset={resetFilters}
@@ -112,7 +112,7 @@ export default function SearchPage() {
                 <span className="font-semibold">Bộ lọc</span>
                 <button onClick={() => setShowFilter(false)}><X size={20} /></button>
               </div>
-              <FilterSidebar petType={petType} priceMin={priceMin} priceMax={priceMax} onChange={updateParam} onPriceChange={updatePrice} onReset={resetFilters} />
+              <FilterSidebar petType={petType} priceMin={priceMin} priceMax={priceMax} inStock={inStock} onChange={updateParam} onPriceChange={updatePrice} onReset={resetFilters} />
             </div>
           </div>
         )}
@@ -126,6 +126,7 @@ export default function SearchPage() {
             petType={petType}
             priceMin={priceMin}
             priceMax={priceMax}
+            inStock={inStock}
             onFilterRemove={(key) => {
               if (key === 'price') { updateParam('price_min', ''); updateParam('price_max', '') }
               else updateParam(key, '')

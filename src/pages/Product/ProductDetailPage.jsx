@@ -7,42 +7,49 @@ import SkeletonCard from '@/components/ui/SkeletonCard'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatPrice } from '@/utils/format'
 import { productService } from '@/services/productService'
-import { mockCategories } from '@/mocks/data'
 import useCartStore from '@/store/cartStore'
 import useAuthStore from '@/store/authStore'
 import useWishlistStore from '@/store/wishlistStore'
 import useToastStore from '@/store/toastStore'
+import useCategoryStore from '@/store/categoryStore'
 import clsx from 'clsx'
 import ReviewSection from './components/ReviewSection'
 import ImageGallery from './components/ImageGallery'
 import ProductSpecs from './components/ProductSpecs'
 
-const catById = Object.fromEntries(mockCategories.map(c => [c.pk_category_id, c]))
-
 export default function ProductDetailPage() {
-  const { slug } = useParams()
+  const { id } = useParams()
   const [product, setProduct] = useState(null)
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [recommendations, setRecommendations] = useState([])
   const [recLoading, setRecLoading] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [reviewStats, setReviewStats] = useState({ avg: 0, count: 0 })
   const { addItem } = useCartStore()
   const { user } = useAuthStore()
   const { isWishlisted, toggle: toggleWishlist } = useWishlistStore()
   const { add: toast } = useToastStore()
   const navigate = useNavigate()
 
+  // Lấy danh mục từ store để build breadcrumb
+  const tree = useCategoryStore((s) => s.tree)
+  const allCats = Array.isArray(tree) ? tree.flatMap(p => [p, ...(p.children ?? [])]) : []
+  const catById = Object.fromEntries(allCats.map(c => [c.pk_category_id, c]))
+
   useEffect(() => {
-    window.scrollTo(0, 0)
     setLoading(true)
-    productService.getDetail(slug)
+    setError(null)
+    productService.getDetail(id)
       .then((data) => {
-        setProduct(data)
-        setSelectedVariant(data.variants?.[0] || null)
+        const product = data?.pk_product_id ? data : data?.data ?? data
+        setProduct(product)
+        setSelectedVariant(product?.variants?.[0] || null)
       })
+      .catch((err) => setError(err?.message || 'Không thể tải sản phẩm'))
       .finally(() => setLoading(false))
-  }, [slug])
+  }, [id])
 
   useEffect(() => {
     if (!product) return
@@ -101,7 +108,7 @@ export default function ProductDetailPage() {
       </div>
     </div>
   )
-  if (!product) return <div className="max-w-7xl mx-auto px-4 py-10 text-center text-stone-400">Không tìm thấy sản phẩm.</div>
+  if (!product) return <div className="max-w-7xl mx-auto px-4 py-10 text-center text-stone-400">{error || 'Không tìm thấy sản phẩm.'}</div>
 
   const effectivePrice = selectedVariant
     ? (selectedVariant.sale_price ?? selectedVariant.price)
@@ -145,8 +152,8 @@ export default function ProductDetailPage() {
           <h1 className="text-2xl font-bold text-stone-800 mb-2">{product.name}</h1>
 
           <div className="flex items-center gap-3 mb-4">
-            <StarRating rating={product.avg_rating || 0} showValue />
-            <span className="text-sm text-stone-400">({product.review_count || 0} đánh giá)</span>
+            <StarRating rating={reviewStats.avg || product.avg_rating || 0} showValue />
+            <span className="text-sm text-stone-400">({reviewStats.count || product.review_count || 0} đánh giá)</span>
             {product.is_consumable === 1 && (
               <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Sản phẩm tiêu hao</span>
             )}
@@ -243,7 +250,12 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Reviews */}
-      <ReviewSection productId={product.pk_product_id} />
+      <ReviewSection
+        productId={product.pk_product_id}
+        onStatsLoad={setReviewStats}
+        productAvgRating={product.avg_rating}
+        productReviewCount={product.review_count}
+      />
 
       {/* Recommendations */}
       <section className="mt-12">

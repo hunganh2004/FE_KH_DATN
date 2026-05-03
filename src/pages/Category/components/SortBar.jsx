@@ -1,13 +1,12 @@
 import { X } from 'lucide-react'
+import useCategoryStore from '@/store/categoryStore'
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Mới nhất' },
   { value: 'price_asc', label: 'Giá tăng dần' },
   { value: 'price_desc', label: 'Giá giảm dần' },
-  { value: 'trending', label: 'Bán chạy' },
+  { value: 'rating', label: 'Đánh giá cao' },
 ]
-
-const PET_TYPE_NAMES = { '1': 'Chó', '2': 'Mèo', '3': 'Cá', '4': 'Chim', '5': 'Thỏ' }
 
 const PRICE_LABELS = {
   '0-100000': 'Dưới 100.000đ',
@@ -16,7 +15,9 @@ const PRICE_LABELS = {
   '500000-99999999': 'Trên 500.000đ',
 }
 
-export default function SortBar({ sort, total, onSortChange, petType, priceMin, priceMax, onFilterRemove }) {
+export default function SortBar({ sort, total, onSortChange, petType, priceMin, priceMax, inStock, subCategory, onFilterRemove }) {
+  const petTypes = useCategoryStore((s) => s.petTypes)
+  const petTypeMap = Object.fromEntries(petTypes.map(p => [String(p.pk_pet_type_id), p.name]))
   const priceKey = priceMin && priceMax ? `${priceMin}-${priceMax}` : null
   const priceLabel = priceKey ? PRICE_LABELS[priceKey] : null
 
@@ -39,23 +40,31 @@ export default function SortBar({ sort, total, onSortChange, petType, priceMin, 
       </div>
 
       {/* Active filter tags */}
-      {onFilterRemove && (petType || priceLabel) && (
+      {onFilterRemove && (petType || priceLabel || inStock || subCategory) && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-stone-400">Đang lọc:</span>
+          {subCategory && (
+            <span className="inline-flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-full">
+              {subCategory}
+              <button onClick={() => onFilterRemove('sub_category')} className="hover:text-emerald-900"><X size={11} /></button>
+            </span>
+          )}
           {petType && (
             <span className="inline-flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-full">
-              {PET_TYPE_NAMES[petType] || petType}
-              <button onClick={() => onFilterRemove('pet_type')} className="hover:text-emerald-900">
-                <X size={11} />
-              </button>
+              {petTypeMap[petType] || petType}
+              <button onClick={() => onFilterRemove('pet_type')} className="hover:text-emerald-900"><X size={11} /></button>
             </span>
           )}
           {priceLabel && (
             <span className="inline-flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-full">
               {priceLabel}
-              <button onClick={() => onFilterRemove('price')} className="hover:text-emerald-900">
-                <X size={11} />
-              </button>
+              <button onClick={() => onFilterRemove('price')} className="hover:text-emerald-900"><X size={11} /></button>
+            </span>
+          )}
+          {inStock === 'true' && (
+            <span className="inline-flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-full">
+              Còn hàng
+              <button onClick={() => onFilterRemove('in_stock')} className="hover:text-emerald-900"><X size={11} /></button>
             </span>
           )}
         </div>

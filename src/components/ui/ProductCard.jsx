@@ -1,15 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart } from 'lucide-react'
 import { formatPrice } from '@/utils/format'
+import { getPrimaryImage } from '@/utils/image'
 import useCartStore from '@/store/cartStore'
 import useWishlistStore from '@/store/wishlistStore'
 import useAuthStore from '@/store/authStore'
 import useToastStore from '@/store/toastStore'
+import ProductImage from '@/components/ui/ProductImage'
 import clsx from 'clsx'
 
 export default function ProductCard({ product, className }) {
-  const { slug, name, price, sale_price, is_consumable, brand, stock } = product
-  const image = product.primary_image || product.images?.[0]?.image_url || '/placeholder-product.png'
+  const { name, price, sale_price, is_consumable, brand, stock } = product
+  const image = getPrimaryImage(product)
   const effectivePrice = sale_price ?? price
   const discountPercent = sale_price ? Math.round((1 - sale_price / price) * 100) : 0
 
@@ -37,13 +39,12 @@ export default function ProductCard({ product, className }) {
   return (
     <div className={clsx('card group hover:shadow-md transition-shadow duration-200 overflow-hidden', className)}>
       {/* Image */}
-      <Link to={`/product/${slug}`} className="block relative overflow-hidden aspect-square bg-stone-50">
-        <img
+      <Link to={`/product/${product.pk_product_id}`} className="block relative overflow-hidden aspect-square bg-stone-50">
+        <ProductImage
           src={image}
           alt={name}
-          referrerPolicy="no-referrer"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
+          wrapClass="w-full h-full"
         />
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -77,7 +78,7 @@ export default function ProductCard({ product, className }) {
       {/* Info */}
       <div className="p-3">
         {brand && <p className="text-xs text-stone-400 mb-0.5">{brand}</p>}
-        <Link to={`/product/${slug}`}>
+        <Link to={`/product/${product.pk_product_id}`}>
           <h3 className="text-sm font-medium text-stone-800 line-clamp-2 hover:text-emerald-600 transition-colors leading-snug">
             {name}
           </h3>

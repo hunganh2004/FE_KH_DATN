@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import ScrollToTop from '@/components/ScrollToTop'
 import MainLayout from '@/components/layout/MainLayout'
 import HomePage from '@/pages/Home/HomePage'
 import CategoryPage from '@/pages/Category/CategoryPage'
@@ -18,22 +19,26 @@ import RegisterPage from '@/pages/Auth/RegisterPage'
 import SearchPage from '@/pages/Search/SearchPage'
 import WriteReviewPage from '@/pages/Order/WriteReviewPage'
 import ForgotPasswordPage from '@/pages/Auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/Auth/ResetPasswordPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* Auth - no layout */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Main layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/product/:slug" element={<ProductDetailPage />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/result" element={<OrderResultPage />} />
@@ -51,5 +56,6 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
+    </>
   )
 }

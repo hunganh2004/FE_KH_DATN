@@ -26,7 +26,7 @@ export default function RepurchaseReminder({ userId }) {
         {items.map(({ product, predicted_date }) => (
           <Link
             key={product.pk_product_id}
-            to={`/product/${product.slug}`}
+            to={`/product/${product.pk_product_id}`}
             className="flex items-center gap-3 bg-white rounded-lg p-3 shadow-sm shrink-0 hover:shadow-md transition-shadow min-w-[220px]"
           >
             <img

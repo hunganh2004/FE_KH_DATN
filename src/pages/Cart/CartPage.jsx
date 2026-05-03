@@ -38,11 +38,11 @@ export default function CartPage() {
             const image = item.product.primary_image || '/placeholder-product.png'
             return (
               <div key={item.key} className="card p-4 flex gap-4">
-                <Link to={`/product/${item.product.slug}`}>
+                <Link to={`/product/${item.product.pk_product_id}`}>
                   <img src={image} alt={item.product.name} className="w-20 h-20 rounded-lg object-cover" />
                 </Link>
                 <div className="flex-1 min-w-0">
-                  <Link to={`/product/${item.product.slug}`} className="font-medium text-stone-800 hover:text-emerald-600 line-clamp-2 text-sm">
+                  <Link to={`/product/${item.product.pk_product_id}`} className="font-medium text-stone-800 hover:text-emerald-600 line-clamp-2 text-sm">
                     {item.product.name}
                   </Link>
                   {item.variant && <p className="text-xs text-stone-400 mt-0.5">{item.variant.name}</p>}

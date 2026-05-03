@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Facebook, Instagram, Youtube, Twitter } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
+import useCategoryStore from '@/store/categoryStore'
 
 const SOCIAL_LINKS = [
   { icon: Facebook, href: '#', label: 'Facebook' },
@@ -12,6 +13,8 @@ const SOCIAL_LINKS = [
 export default function Footer() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const tree = useCategoryStore((s) => s.tree)
+  const parentCats = Array.isArray(tree) ? tree : []
 
   const handleAccountLink = (path) => (e) => {
     e.preventDefault()
@@ -51,12 +54,13 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-white mb-3">Danh mục</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/category/thuc-an" className="hover:text-white transition-colors">Thức ăn</Link></li>
-            <li><Link to="/category/do-choi" className="hover:text-white transition-colors">Đồ chơi</Link></li>
-            <li><Link to="/category/phu-kien" className="hover:text-white transition-colors">Phụ kiện</Link></li>
-            <li><Link to="/category/cham-soc" className="hover:text-white transition-colors">Chăm sóc</Link></li>
-            <li><Link to="/category/thoi-trang" className="hover:text-white transition-colors">Thời trang</Link></li>
-            <li><Link to="/category/chuong-nha" className="hover:text-white transition-colors">Chuồng & Nhà</Link></li>
+            {parentCats.map((cat) => (
+              <li key={cat.pk_category_id}>
+                <Link to={`/category/${cat.slug}`} className="hover:text-white transition-colors">
+                  {cat.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 

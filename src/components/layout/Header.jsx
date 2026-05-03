@@ -1,19 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, NavLink } from 'react-router-dom'
-import { ShoppingCart, Search, User, Bell, Menu, X, Heart, ChevronDown, Star } from 'lucide-react'
+import { ShoppingCart, Search, Bell, Menu, X, Heart, ChevronDown, Star } from 'lucide-react'
 import useCartStore, { calcCart } from '@/store/cartStore'
 import useAuthStore from '@/store/authStore'
 import useWishlistStore from '@/store/wishlistStore'
-import useToastStore from '@/store/toastStore'
-import { mockUserService } from '@/mocks/mockApi'
-import { mockProducts, mockCategories } from '@/mocks/data'
-
-// Danh mục cha (không có fk_parent_id)
-const parentCats = mockCategories.filter(c => !c.fk_parent_id).sort((a, b) => a.sort_order - b.sort_order)
-// Map danh mục con theo parent
-const childMap = mockCategories
-  .filter(c => c.fk_parent_id)
-  .reduce((acc, c) => { (acc[c.fk_parent_id] ??= []).push(c); return acc }, {})
+import { notificationService } from '@/services/notificationService'
+import useCategoryStore from '@/store/categoryStore'
 
 const CAT_ICONS = {
   'thuc-an': '🍖', 'phu-kien': '🎀', 'do-choi': '🎾',
@@ -29,28 +21,22 @@ export default function Header() {
   const navigate = useNavigate()
   const { items: cartItems } = useCartStore()
   const { itemCount } = calcCart(cartItems)
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
   const { count: wishlistCount } = useWishlistStore()
-  const { add: toast } = useToastStore()
+  const tree = useCategoryStore((s) => s.tree)
+  const petTypes = useCategoryStore((s) => s.petTypes)
 
-  // Autocomplete — tìm trong mockProducts
-  const suggestions = searchQuery.trim().length >= 1
-    ? mockProducts
-        .filter(p =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 5)
-    : []
+  const parentCats = Array.isArray(tree) ? tree : []
+  const childMap = Object.fromEntries(parentCats.map(p => [p.pk_category_id, p.children ?? []]))
+  const suggestions = []
 
   useEffect(() => {
     if (!user) { setUnreadCount(0); return }
-    mockUserService.getNotifications()
-      .then(data => setUnreadCount((data?.items || []).filter(n => n.is_read === 0).length))
+    notificationService.getUnreadCount()
+      .then(data => setUnreadCount(data?.unread_count ?? 0))
       .catch(() => {})
   }, [user])
 
-  // Đóng dropdown khi click ngoài
   useEffect(() => {
     const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -71,7 +57,7 @@ export default function Header() {
   }
 
   const handleSelectSuggestion = (product) => {
-    navigate(`/product/${product.slug}`)
+    navigate(`/product/${product.pk_product_id}`)
     setSearchQuery('')
     setShowSuggestions(false)
   }
@@ -79,15 +65,12 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Top bar */}
         <div className="flex items-center gap-4 h-16">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-[22px] shrink-0">🐕</div>
             <span className="text-xl font-bold tracking-tight text-emerald-500 hidden sm:block">PetShop</span>
           </Link>
 
-          {/* Search bar — desktop */}
           <div ref={searchRef} className="flex-1 max-w-xl hidden md:block relative">
             <form onSubmit={handleSearch}>
               <div className="relative">
@@ -111,48 +94,35 @@ export default function Header() {
                 )}
               </div>
             </form>
-
-            {/* Autocomplete dropdown */}
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-xl z-50 overflow-hidden">
                 <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest px-4 pt-3 pb-1">Gợi ý</p>
                 {suggestions.map(p => (
-                  <button
-                    key={p.pk_product_id}
-                    onMouseDown={() => handleSelectSuggestion(p)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-emerald-50 transition-colors text-left group"
-                  >
-                    <img
-                      src={p.primary_image}
-                      alt={p.name}
-                      referrerPolicy="no-referrer"
-                      className="w-10 h-10 rounded-lg object-cover shrink-0 group-hover:scale-105 transition-transform"
-                    />
+                  <button key={p.pk_product_id} onMouseDown={() => handleSelectSuggestion(p)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-emerald-50 transition-colors text-left group">
+                    <img src={p.primary_image} alt={p.name} referrerPolicy="no-referrer"
+                      className="w-10 h-10 rounded-lg object-cover shrink-0 group-hover:scale-105 transition-transform" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-stone-800 truncate group-hover:text-emerald-600">{p.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs font-bold text-emerald-600">
-                          {((p.sale_price ?? p.price) / 1000).toFixed(0)}k₫
+                          {((p.sale_price ?? p.price) / 1000).toFixed(0)}k&#8363;
                         </span>
                         <span className="flex items-center gap-0.5 text-[10px] text-amber-500">
-                          <Star size={10} fill="currentColor" />
-                          {p.avg_rating}
+                          <Star size={10} fill="currentColor" />{p.avg_rating}
                         </span>
                       </div>
                     </div>
                   </button>
                 ))}
-                <button
-                  onMouseDown={handleSearch}
-                  className="w-full text-center text-xs font-bold text-emerald-600 hover:bg-emerald-50 py-2.5 border-t border-stone-100 transition-colors"
-                >
+                <button onMouseDown={handleSearch}
+                  className="w-full text-center text-xs font-bold text-emerald-600 hover:bg-emerald-50 py-2.5 border-t border-stone-100 transition-colors">
                   Xem tất cả kết quả
                 </button>
               </div>
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-1 ml-auto">
             {user ? (
               <>
@@ -183,7 +153,6 @@ export default function Header() {
             ) : (
               <Link to="/login" className="btn-primary text-sm py-1.5 px-4">Đăng nhập</Link>
             )}
-
             <Link to="/cart" className="relative p-2 text-stone-600 hover:text-emerald-500 rounded-full hover:bg-stone-100">
               <ShoppingCart size={22} />
               {itemCount > 0 && (
@@ -192,24 +161,17 @@ export default function Header() {
                 </span>
               )}
             </Link>
-
             <button className="p-2 text-stone-600 md:hidden rounded-full hover:bg-stone-100" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile search */}
         <div className="pb-3 md:hidden">
           <form onSubmit={handleSearch}>
             <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm sản phẩm..."
-                className="input-base pr-10"
-              />
+              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm kiếm sản phẩm..." className="input-base pr-10" />
               <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400">
                 <Search size={18} />
               </button>
@@ -218,7 +180,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Nav bar — Mega Menu */}
       <nav className="border-t border-stone-100 hidden md:block">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center h-10 gap-0.5">
@@ -232,17 +193,14 @@ export default function Header() {
                 `px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isActive ? 'text-emerald-600 bg-emerald-50' : 'text-stone-600 hover:text-emerald-600 hover:bg-stone-50'}`
               }>Tất cả sản phẩm</NavLink>
             </li>
-
             <li className="w-px h-4 bg-stone-200 mx-1 shrink-0" />
 
-            {/* Nút Danh mục — Mega Menu */}
+            {/* Danh mục — Mega Menu */}
             <li className="relative group">
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors">
                 <span>Danh mục</span>
                 <ChevronDown size={14} className="text-stone-400 group-hover:text-emerald-500 group-hover:rotate-180 transition-transform duration-200" />
               </button>
-
-              {/* Mega Menu Panel */}
               <div className="absolute top-full left-0 mt-0.5 w-[640px] bg-white border border-stone-100 rounded-2xl shadow-2xl py-5 px-6
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible
                               transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
@@ -251,29 +209,19 @@ export default function Header() {
                     const children = childMap[cat.pk_category_id] || []
                     return (
                       <div key={cat.slug}>
-                        {/* Category cha */}
-                        <Link
-                          to={`/category/${cat.slug}`}
-                          className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-emerald-50 group/cat transition-colors"
-                        >
+                        <Link to={`/category/${cat.slug}`}
+                          className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-emerald-50 group/cat transition-colors">
                           <div>
-                            <p className="text-sm font-semibold text-stone-800 group-hover/cat:text-emerald-600 transition-colors leading-tight">
-                              {cat.name}
-                            </p>
-                            <p className="text-[11px] text-stone-400">{cat.product_count} sản phẩm</p>
+                            <p className="text-sm font-semibold text-stone-800 group-hover/cat:text-emerald-600 transition-colors leading-tight">{cat.name}</p>
                           </div>
                         </Link>
-                        {/* Category con */}
                         {children.length > 0 && (
                           <ul className="ml-2 mb-3 space-y-0.5">
                             {children.map(child => (
                               <li key={child.slug}>
-                                <Link
-                                  to={`/category/${child.slug}`}
-                                  className="flex items-center justify-between text-xs text-stone-500 hover:text-emerald-600 py-1 px-2 rounded-md hover:bg-emerald-50 transition-colors"
-                                >
+                                <Link to={`/category/${child.slug}`}
+                                  className="flex items-center justify-between text-xs text-stone-500 hover:text-emerald-600 py-1 px-2 rounded-md hover:bg-emerald-50 transition-colors">
                                   <span>{child.name}</span>
-                                  <span className="text-stone-300">{child.product_count}</span>
                                 </Link>
                               </li>
                             ))}
@@ -283,14 +231,10 @@ export default function Header() {
                     )
                   })}
                 </div>
-
-                {/* Footer của mega menu */}
                 <div className="border-t border-stone-100 mt-3 pt-3">
-                  <Link
-                    to="/search"
-                    className="flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 py-2 rounded-lg transition-colors"
-                  >
-                    Xem tất cả sản phẩm →
+                  <Link to="/search"
+                    className="flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 py-2 rounded-lg transition-colors">
+                    Xem tất cả sản phẩm
                   </Link>
                 </div>
               </div>
@@ -298,7 +242,7 @@ export default function Header() {
 
             <li className="w-px h-4 bg-stone-200 mx-1 shrink-0" />
 
-            {/* Loại thú cưng dropdown */}
+            {/* Loại thú cưng */}
             <li className="relative group">
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors">
                 <span>Loại thú cưng</span>
@@ -307,18 +251,9 @@ export default function Header() {
               <div className="absolute top-full left-0 mt-0.5 min-w-[160px] bg-white border border-stone-100 rounded-xl shadow-xl py-1.5
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible
                               transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
-                {[
-                  { id: 1, name: 'Chó' },
-                  { id: 2, name: 'Mèo' },
-                  { id: 3, name: 'Cá' },
-                  { id: 4, name: 'Chim' },
-                  { id: 5, name: 'Thỏ' },
-                ].map((pet) => (
-                  <Link
-                    key={pet.id}
-                    to={`/search?pet_type=${pet.id}`}
-                    className="flex items-center px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
-                  >
+                {petTypes.map((pet) => (
+                  <Link key={pet.pk_pet_type_id} to={`/search?pet_type=${pet.pk_pet_type_id}`}
+                    className="flex items-center px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
                     {pet.name}
                   </Link>
                 ))}
@@ -328,7 +263,6 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-stone-100 bg-white px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
           <Link to="/" onClick={() => setMobileMenuOpen(false)}
@@ -352,7 +286,7 @@ export default function Header() {
                 {children.map(child => (
                   <Link key={child.slug} to={`/category/${child.slug}`} onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 pl-9 pr-3 py-2 text-sm text-stone-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
-                    └ {child.name}
+                    {child.name}
                   </Link>
                 ))}
               </div>
@@ -360,16 +294,10 @@ export default function Header() {
           })}
           <div className="border-t border-stone-100 my-2" />
           <p className="px-3 py-1 text-xs font-semibold text-stone-400 uppercase tracking-wider">Loại thú cưng</p>
-          {[
-            { id: 1, name: 'Chó', icon: '🐶' },
-            { id: 2, name: 'Mèo', icon: '🐱' },
-            { id: 3, name: 'Cá', icon: '🐟' },
-            { id: 4, name: 'Chim', icon: '🐦' },
-            { id: 5, name: 'Thỏ', icon: '🐰' },
-          ].map((pet) => (
-            <Link key={pet.id} to={`/search?pet_type=${pet.id}`} onClick={() => setMobileMenuOpen(false)}
+          {petTypes.map((pet) => (
+            <Link key={pet.pk_pet_type_id} to={`/search?pet_type=${pet.pk_pet_type_id}`} onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 px-3 py-2.5 text-sm text-stone-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
-              <span>{pet.icon}</span>{pet.name}
+              {pet.name}
             </Link>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
+import { authService } from '@/services/authService'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -12,9 +13,15 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     if (!email.trim()) { setError('Vui lòng nhập email.'); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800)) // mock delay
-    setLoading(false)
-    setSent(true)
+    setError('')
+    try {
+      await authService.forgotPassword(email)
+      setSent(true)
+    } catch (err) {
+      setError(err?.message || 'Có lỗi xảy ra, vui lòng thử lại.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
