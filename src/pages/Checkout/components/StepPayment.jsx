@@ -1,32 +1,40 @@
 import { useState } from 'react'
 import { CheckCircle, XCircle } from 'lucide-react'
 import clsx from 'clsx'
-import { mockCouponService } from '@/mocks/mockApi'
+import { orderService } from '@/services/orderService'
 import { formatPrice } from '@/utils/format'
+import useCartStore, { calcCart } from '@/store/cartStore'
 
 const PAYMENT_METHODS = [
-  { value: 'cod', label: 'Thanh toán khi nhận hàng (COD)', icon: '💵' },
-  { value: 'bank_transfer', label: 'Chuyển khoản ngân hàng', icon: '🏦' },
-  { value: 'momo', label: 'Ví MoMo', icon: '💜' },
-  { value: 'vnpay', label: 'VNPay', icon: '🔵' },
+  { value: 'cod',          label: 'Thanh toán khi nhận hàng (COD)', icon: '💵', available: true },
+  { value: 'bank_transfer',label: 'Chuyển khoản ngân hàng',         icon: '🏦', available: false },
+  { value: 'momo',         label: 'Ví MoMo',                        icon: '💜', available: false },
+  { value: 'vnpay',        label: 'VNPay',                          icon: '🔵', available: false },
 ]
 
 export default function StepPayment({ method, couponCode, onChange, onBack, onNext }) {
   const [couponInput, setCouponInput] = useState(couponCode || '')
-  const [couponStatus, setCouponStatus] = useState(null) // null | 'valid' | 'invalid'
+  const [couponStatus, setCouponStatus] = useState(null)
   const [couponInfo, setCouponInfo] = useState(null)
   const [applying, setApplying] = useState(false)
+
+  const { items } = useCartStore()
+  const { subtotal } = calcCart(items)
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return
     setApplying(true)
     setCouponStatus(null)
     try {
-      const result = await mockCouponService.validate(couponInput.trim())
+      const res = await orderService.validateCoupon({
+        code: couponInput.trim(),
+        order_total: subtotal,
+      })
+      const data = res?.data ?? res
       setCouponStatus('valid')
-      setCouponInfo(result)
+      setCouponInfo({ code: couponInput.trim(), discount_amount: data?.discount_amount })
       onChange('couponCode', couponInput.trim())
-    } catch (err) {
+    } catch {
       setCouponStatus('invalid')
       setCouponInfo(null)
       onChange('couponCode', '')
@@ -49,15 +57,22 @@ export default function StepPayment({ method, couponCode, onChange, onBack, onNe
         {PAYMENT_METHODS.map((pm) => (
           <button
             key={pm.value}
-            onClick={() => onChange('paymentMethod', pm.value)}
+            onClick={() => pm.available
+              ? onChange('paymentMethod', pm.value)
+              : alert('Phương thức thanh toán này đang được phát triển, vui lòng chọn phương thức khác.')
+            }
             className={clsx(
               'w-full text-left card p-4 border-2 flex items-center gap-3 transition-colors',
-              method === pm.value ? 'border-emerald-500 bg-emerald-50' : 'border-transparent hover:border-stone-200'
+              !pm.available && 'opacity-60 cursor-not-allowed',
+              pm.available && method === pm.value ? 'border-emerald-500 bg-emerald-50' : 'border-transparent hover:border-stone-200'
             )}
           >
             <span className="text-2xl">{pm.icon}</span>
-            <span className="font-medium text-sm">{pm.label}</span>
-            {method === pm.value && (
+            <span className="font-medium text-sm flex-1">{pm.label}</span>
+            {!pm.available && (
+              <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">Sắp ra mắt</span>
+            )}
+            {pm.available && method === pm.value && (
               <CheckCircle size={18} className="ml-auto text-emerald-500 shrink-0" />
             )}
           </button>
@@ -73,7 +88,9 @@ export default function StepPayment({ method, couponCode, onChange, onBack, onNe
             <CheckCircle size={18} className="text-emerald-500 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-emerald-700">{couponInfo.code}</p>
-              <p className="text-xs text-emerald-600">{couponInfo.description}</p>
+              <p className="text-xs text-emerald-600">
+                Giảm {formatPrice(couponInfo.discount_amount)}
+              </p>
             </div>
             <button onClick={handleRemoveCoupon} className="text-stone-400 hover:text-red-400 shrink-0">
               <XCircle size={18} />

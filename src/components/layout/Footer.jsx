@@ -4,10 +4,10 @@ import useAuthStore from '@/store/authStore'
 import useCategoryStore from '@/store/categoryStore'
 
 const SOCIAL_LINKS = [
-  { icon: Facebook, href: '#', label: 'Facebook' },
-  { icon: Instagram, href: '#', label: 'Instagram' },
-  { icon: Youtube, href: '#', label: 'Youtube' },
-  { icon: Twitter, href: '#', label: 'Twitter' },
+  { icon: Facebook, href: 'https://www.facebook.com/nguyen.hung.anh.691838?locale=vi_VN', label: 'Facebook' },
+  { icon: Instagram, href: 'https://www.instagram.com/nguyenhunganh2004hy/', label: 'Instagram' },
+  { icon: Youtube, href: 'https://www.youtube.com/@hunganhdz', label: 'Youtube' },
+  // { icon: Twitter, href: '#', label: 'Twitter' },
 ]
 
 export default function Footer() {
@@ -42,6 +42,7 @@ export default function Footer() {
                 key={label}
                 href={href}
                 aria-label={label}
+                target='_blank'
                 className="w-8 h-8 rounded-full bg-stone-700 hover:bg-emerald-500 flex items-center justify-center transition-colors"
               >
                 <Icon size={15} />
@@ -79,7 +80,7 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-white mb-3">Hỗ trợ</h4>
           <ul className="space-y-2 text-sm mb-4">
-            <li className="flex items-center gap-2">📞 <span>1800 xxxx</span></li>
+            <li className="flex items-center gap-2">📞 <span>0865 713 676</span></li>
             <li className="flex items-center gap-2">✉️ <span>support@petshop.vn</span></li>
             <li className="flex items-center gap-2">🕐 <span>8:00 - 22:00 hàng ngày</span></li>
           </ul>

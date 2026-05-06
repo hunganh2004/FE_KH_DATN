@@ -1,5 +1,7 @@
 import { formatPrice } from '@/utils/format'
+import { getPrimaryImage } from '@/utils/image'
 import useCartStore, { calcCart } from '@/store/cartStore'
+import ProductImage from '@/components/ui/ProductImage'
 
 const METHOD_LABELS = {
   cod: 'Thanh toán khi nhận hàng',
@@ -29,7 +31,7 @@ export default function StepConfirm({ orderData, items, loading, onBack, onSubmi
           const price = item.variant?.sale_price ?? item.variant?.price ?? item.product.sale_price ?? item.product.price
           return (
             <div key={item.key} className="flex items-center gap-3">
-              <img src={item.product.primary_image || '/placeholder-product.png'} alt="" className="w-12 h-12 rounded-lg object-cover" />
+              <ProductImage src={getPrimaryImage(item.product)} alt="" className="w-12 h-12 rounded-lg object-cover" wrapClass="w-12 h-12 rounded-lg shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium line-clamp-1">{item.product.name}</p>
                 {item.variant && <p className="text-xs text-stone-400">{item.variant.name}</p>}

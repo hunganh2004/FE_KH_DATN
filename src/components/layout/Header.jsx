@@ -6,6 +6,7 @@ import useAuthStore from '@/store/authStore'
 import useWishlistStore from '@/store/wishlistStore'
 import { notificationService } from '@/services/notificationService'
 import useCategoryStore from '@/store/categoryStore'
+import useNotificationStore from '@/store/notificationStore'
 
 const CAT_ICONS = {
   'thuc-an': '🍖', 'phu-kien': '🎀', 'do-choi': '🎾',
@@ -16,7 +17,6 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
   const searchRef = useRef(null)
   const navigate = useNavigate()
   const { items: cartItems } = useCartStore()
@@ -25,16 +25,18 @@ export default function Header() {
   const { count: wishlistCount } = useWishlistStore()
   const tree = useCategoryStore((s) => s.tree)
   const petTypes = useCategoryStore((s) => s.petTypes)
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
+  const fetchUnreadCount = useNotificationStore((s) => s.fetchUnreadCount)
 
   const parentCats = Array.isArray(tree) ? tree : []
   const childMap = Object.fromEntries(parentCats.map(p => [p.pk_category_id, p.children ?? []]))
   const suggestions = []
 
   useEffect(() => {
-    if (!user) { setUnreadCount(0); return }
-    notificationService.getUnreadCount()
-      .then(data => setUnreadCount(data?.unread_count ?? 0))
-      .catch(() => {})
+    if (!user) { useNotificationStore.getState().reset(); return }
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
   }, [user])
 
   useEffect(() => {

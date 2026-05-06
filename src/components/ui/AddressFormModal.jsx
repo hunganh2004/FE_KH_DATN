@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { addressService } from '@/services/addressService'
 
 const PROVINCES = [
   'TP. Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng',
@@ -34,18 +35,22 @@ export default function AddressFormModal({ onClose, onSave }) {
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setSaving(true)
-    await new Promise(r => setTimeout(r, 400)) // mock delay
-    onSave({
-      pk_address_id: Date.now(),
-      fk_user_id: 1,
-      ...form,
-      receiver: form.receiver.trim(),
-      phone: form.phone.trim(),
-      commune: form.commune.trim(),
-      street: form.street.trim(),
-    })
-    setSaving(false)
-    onClose()
+    try {
+      await addressService.add({
+        receiver: form.receiver.trim(),
+        phone: form.phone.trim(),
+        province: form.province,
+        commune: form.commune.trim(),
+        street: form.street.trim(),
+        is_default: form.is_default === 1,
+      })
+      onSave()
+      onClose()
+    } catch (err) {
+      setErrors({ street: err?.message || 'Có lỗi xảy ra, vui lòng thử lại.' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

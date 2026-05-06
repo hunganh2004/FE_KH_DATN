@@ -1,37 +1,51 @@
 import { useEffect, useState } from 'react'
-import { MapPin, Plus, Trash2, Pencil } from 'lucide-react'
+import { MapPin, Plus, Trash2 } from 'lucide-react'
 import AccountSidebar from './components/AccountSidebar'
 import AddressFormModal from '@/components/ui/AddressFormModal'
-import { mockUserService } from '@/mocks/mockApi'
+import { addressService } from '@/services/addressService'
+import useToastStore from '@/store/toastStore'
 
 export default function AddressBookPage() {
   const [addresses, setAddresses] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const { add: toast } = useToastStore()
 
-  useEffect(() => {
-    mockUserService.getAddresses().then((data) => setAddresses(data || [])).finally(() => setLoading(false))
-  }, [])
+  const load = () => {
+    setLoading(true)
+    addressService.getAll()
+      .then((res) => setAddresses(Array.isArray(res) ? res : (res?.data ?? [])))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
 
-  const handleSave = (newAddr) => {
-    if (newAddr.is_default === 1) {
-      setAddresses(a => [newAddr, ...a.map(addr => ({ ...addr, is_default: 0 }))])
-    } else {
-      setAddresses(a => [...a, newAddr])
+  useEffect(() => { load() }, [])
+
+  const handleSave = () => {
+    setShowModal(false)
+    load()
+    toast('Đã thêm địa chỉ mới', 'success')
+  }
+
+  const setDefault = async (id) => {
+    try {
+      await addressService.setDefault(id)
+      setAddresses(a => a.map(addr => ({ ...addr, is_default: addr.pk_address_id === id ? 1 : 0 })))
+      toast('Đã đặt địa chỉ mặc định', 'success')
+    } catch {
+      toast('Có lỗi xảy ra', 'error')
     }
   }
 
-  const setDefault = (id) => {
-    mockUserService.setDefaultAddress(id).then(() => {
-      setAddresses(a => a.map(addr => ({ ...addr, is_default: addr.pk_address_id === id ? 1 : 0 })))
-    }).catch(() => {})
-  }
-
-  const remove = (id) => {
+  const remove = async (id) => {
     if (!confirm('Bạn có chắc muốn xoá địa chỉ này?')) return
-    mockUserService.deleteAddress(id).then(() => {
+    try {
+      await addressService.remove(id)
       setAddresses(a => a.filter(addr => addr.pk_address_id !== id))
-    }).catch(() => {})
+      toast('Đã xoá địa chỉ', 'info')
+    } catch {
+      toast('Có lỗi xảy ra', 'error')
+    }
   }
 
   return (

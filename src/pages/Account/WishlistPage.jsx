@@ -28,9 +28,12 @@ export default function WishlistPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {items.map((item) => (
-                <ProductCard key={item.pk_wishlist_id} product={item.product} />
-              ))}
+              {items.map((item) => {
+                const product = item.product ?? item
+                return product?.pk_product_id
+                  ? <ProductCard key={product.pk_product_id} product={product} />
+                  : null
+              })}
             </div>
           )}
         </div>

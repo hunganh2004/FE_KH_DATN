@@ -7,6 +7,7 @@ import SkeletonCard from '@/components/ui/SkeletonCard'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatPrice } from '@/utils/format'
 import { productService } from '@/services/productService'
+import { logBehavior } from '@/services/behaviorService'
 import useCartStore from '@/store/cartStore'
 import useAuthStore from '@/store/authStore'
 import useWishlistStore from '@/store/wishlistStore'
@@ -46,6 +47,10 @@ export default function ProductDetailPage() {
         const product = data?.pk_product_id ? data : data?.data ?? data
         setProduct(product)
         setSelectedVariant(product?.variants?.[0] || null)
+        // Ghi log xem sản phẩm
+        if (product?.pk_product_id) {
+          logBehavior({ product_id: product.pk_product_id, action: 'view_product' })
+        }
       })
       .catch((err) => setError(err?.message || 'Không thể tải sản phẩm'))
       .finally(() => setLoading(false))

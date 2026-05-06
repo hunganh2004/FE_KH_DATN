@@ -20,7 +20,12 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    orderService.getDetail(id).then(setOrder).finally(() => setLoading(false))
+    orderService.getDetail(id)
+      .then((res) => {
+        const order = res?.pk_order_id ? res : (res?.data ?? res)
+        setOrder(order)
+      })
+      .finally(() => setLoading(false))
   }, [id])
 
   const handleCancel = async () => {

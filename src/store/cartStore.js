@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { cartService } from '@/services/cartService'
+import { logBehavior } from '@/services/behaviorService'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
 
@@ -39,8 +40,9 @@ const useCartStore = create(
         if (USE_MOCK) return
         set({ loading: true })
         try {
-          const data = await cartService.getCart()
-          set({ items: (data ?? []).map(normalizeServerItem) })
+          const res = await cartService.getCart()
+          const items = Array.isArray(res) ? res : (res?.data ?? [])
+          set({ items: items.map(normalizeServerItem) })
         } catch {
           // silent fail — giữ nguyên local items
         } finally {
@@ -68,6 +70,7 @@ const useCartStore = create(
         // Server mode
         try {
           await cartService.addItem(product.pk_product_id, variant?.pk_variant_id, quantity)
+          logBehavior({ product_id: product.pk_product_id, action: 'add_to_cart' })
           await get().fetchCart()
         } catch (err) {
           throw err

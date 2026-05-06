@@ -16,8 +16,8 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         <FeaturedCategories />
 
-        {user && <RepurchaseReminder userId={user.pk_user_id} />}
-        <RecommendedSection userId={user?.pk_user_id} />
+        {user && <RepurchaseReminder userId={user.pk_user_id ?? user.id} />}
+        <RecommendedSection userId={user?.pk_user_id ?? user?.id} />
 
         <TrendingSection />
       </div>

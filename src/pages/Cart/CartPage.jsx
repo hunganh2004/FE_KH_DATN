@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Trash2, ShoppingBag } from 'lucide-react'
 import { formatPrice } from '@/utils/format'
+import { getPrimaryImage } from '@/utils/image'
 import useCartStore, { calcCart } from '@/store/cartStore'
 import useAuthStore from '@/store/authStore'
+import ProductImage from '@/components/ui/ProductImage'
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem } = useCartStore()
@@ -35,11 +37,11 @@ export default function CartPage() {
         <div className="flex-1 space-y-3">
           {items.map((item) => {
             const price = item.variant?.sale_price ?? item.variant?.price ?? item.product.sale_price ?? item.product.price
-            const image = item.product.primary_image || '/placeholder-product.png'
+            const image = getPrimaryImage(item.product)
             return (
               <div key={item.key} className="card p-4 flex gap-4">
                 <Link to={`/product/${item.product.pk_product_id}`}>
-                  <img src={image} alt={item.product.name} className="w-20 h-20 rounded-lg object-cover" />
+                  <ProductImage src={image} alt={item.product.name} className="w-20 h-20 rounded-lg object-cover" wrapClass="w-20 h-20 rounded-lg" />
                 </Link>
                 <div className="flex-1 min-w-0">
                   <Link to={`/product/${item.product.pk_product_id}`} className="font-medium text-stone-800 hover:text-emerald-600 line-clamp-2 text-sm">

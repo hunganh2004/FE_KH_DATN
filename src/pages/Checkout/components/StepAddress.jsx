@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MapPin, Plus } from 'lucide-react'
-import { mockUserService } from '@/mocks/mockApi'
+import { addressService } from '@/services/addressService'
 import AddressFormModal from '@/components/ui/AddressFormModal'
 import clsx from 'clsx'
 
@@ -8,14 +8,19 @@ export default function StepAddress({ selected, onSelect, onNext }) {
   const [addresses, setAddresses] = useState([])
   const [showModal, setShowModal] = useState(false)
 
-  useEffect(() => {
-    mockUserService.getAddresses().then((data) => {
-      setAddresses(data || [])
-      if (!selected && data?.length > 0) {
-        onSelect(data.find(a => a.is_default) || data[0])
-      }
-    }).catch(() => {})
-  }, [])
+  const load = () => {
+    addressService.getAll()
+      .then((res) => {
+        const data = Array.isArray(res) ? res : (res?.data ?? [])
+        setAddresses(data)
+        if (!selected && data.length > 0) {
+          onSelect(data.find(a => a.is_default) || data[0])
+        }
+      })
+      .catch(() => {})
+  }
+
+  useEffect(() => { load() }, [])
 
   return (
     <div>
@@ -56,10 +61,9 @@ export default function StepAddress({ selected, onSelect, onNext }) {
       {showModal && (
         <AddressFormModal
           onClose={() => setShowModal(false)}
-          onSave={(newAddr) => {
-            setAddresses(a => [...a, newAddr])
-            onSelect(newAddr)
+          onSave={() => {
             setShowModal(false)
+            load()
           }}
         />
       )}

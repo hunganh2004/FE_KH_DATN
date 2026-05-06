@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, LogIn } from 'lucide-react'
+import { Sparkles, LogIn, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductCard from '@/components/ui/ProductCard'
 import SkeletonCard from '@/components/ui/SkeletonCard'
 import { productService } from '@/services/productService'
@@ -8,18 +8,41 @@ import { productService } from '@/services/productService'
 export default function RecommendedSection({ userId }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(!!userId)
+  const scrollRef = useRef(null)
 
   useEffect(() => {
     if (!userId) return
     setLoading(true)
     productService
-      .getRecommendations({ user_id: userId, context: 'homepage', limit: 8 })
+      .getRecommendations({ user_id: userId, context: 'homepage' })
       .then((data) => setProducts(data?.items || []))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
   }, [userId])
 
-  if (!loading && userId && products.length === 0) return null
+  const scroll = (dir) => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * 280, behavior: 'smooth' })
+  }
+
+  if (!loading && userId && products.length === 0) return (
+    <section className="bg-gradient-to-br from-emerald-50 to-stone-50 border border-emerald-100 rounded-2xl p-5">
+      <div className="flex items-center gap-2.5 mb-5">
+        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+          <Sparkles size={16} className="text-white" />
+        </div>
+        <div>
+          <h2 className="text-base font-semibold text-stone-800">Dành riêng cho bạn</h2>
+          <p className="text-xs text-stone-400">Được cá nhân hóa dựa trên lịch sử của bạn</p>
+        </div>
+      </div>
+      <div className="text-center py-8 text-stone-400">
+        <Sparkles size={32} className="mx-auto mb-3 text-emerald-300" />
+        <p className="text-sm">Hãy mua sắm thêm để nhận gợi ý phù hợp với bạn.</p>
+      </div>
+    </section>
+  )
 
   return (
     <section className="bg-gradient-to-br from-emerald-50 to-stone-50 border border-emerald-100 rounded-2xl p-5">
@@ -34,15 +57,25 @@ export default function RecommendedSection({ userId }) {
             <p className="text-xs text-stone-400">Được cá nhân hóa dựa trên lịch sử của bạn</p>
           </div>
         </div>
-        <span className="text-xs font-medium text-emerald-600 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full shrink-0">
-          ✨ Gợi ý bởi AI
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-emerald-600 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full hidden sm:block">
+            ✨ Gợi ý bởi AI
+          </span>
+          {!loading && products.length > 0 && (
+            <>
+              <button onClick={() => scroll(-1)} className="w-7 h-7 bg-white border border-stone-200 rounded-full shadow-sm flex items-center justify-center text-stone-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              <button onClick={() => scroll(1)} className="w-7 h-7 bg-white border border-stone-200 rounded-full shadow-sm flex items-center justify-center text-stone-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors">
+                <ChevronRight size={16} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Guest CTA */}
       {!userId ? (
         <div className="relative rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 overflow-hidden">
-          {/* Blurred product preview */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 blur-sm pointer-events-none select-none opacity-50">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="card overflow-hidden">
@@ -55,8 +88,6 @@ export default function RecommendedSection({ userId }) {
               </div>
             ))}
           </div>
-
-          {/* Overlay CTA */}
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/70 backdrop-blur-[2px]">
             <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
               <Sparkles size={22} className="text-emerald-500" />
@@ -71,10 +102,23 @@ export default function RecommendedSection({ userId }) {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto pb-2 scroll-smooth"
+          style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <style>{`.rec-scroll::-webkit-scrollbar { display: none; }`}</style>
           {loading
-            ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-            : products.map((p) => <ProductCard key={p.pk_product_id} product={p} />)
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)]">
+                  <SkeletonCard />
+                </div>
+              ))
+            : products.map((p) => (
+                <div key={p.pk_product_id} className="shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)]" style={{ scrollSnapAlign: 'start' }}>
+                  <ProductCard product={p} />
+                </div>
+              ))
           }
         </div>
       )}

@@ -8,6 +8,7 @@ import SortBar from '@/pages/Category/components/SortBar'
 import FilterSidebar from '@/pages/Category/components/FilterSidebar'
 import { productService } from '@/services/productService'
 import useCategoryStore from '@/store/categoryStore'
+import { logBehavior } from '@/services/behaviorService'
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -29,6 +30,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     setLoading(true)
+    if (q) logBehavior({ action: 'search', search_query: q })
     productService.search({ q, pet_type: petType, sort, page, price_min: priceMin, price_max: priceMax, in_stock: inStock, limit: 20 })
       .then((data) => {
         setProducts(data?.items || [])

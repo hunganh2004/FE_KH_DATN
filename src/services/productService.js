@@ -88,7 +88,10 @@ const realProductService = {
   getRecommendations: ({ product_id, limit = 8 } = {}) => {
     if (product_id) {
       return api.get(`/recommendations/product/${product_id}`)
-        .then((items) => ({ items: Array.isArray(items) ? items : [] }))
+        .then((res) => {
+          const items = Array.isArray(res) ? res : (res?.data ?? [])
+          return { items }
+        })
         .catch(() =>
           // fallback: lấy sản phẩm mới nhất nếu recommendations lỗi
           api.get('/products', { params: { limit, sort: 'created_at', order: 'DESC' } })
@@ -100,7 +103,10 @@ const realProductService = {
     const token = useAuthStore.getState().token
     if (!token) return Promise.resolve({ items: [] })
     return api.get('/recommendations/homepage')
-      .then((items) => ({ items: Array.isArray(items) ? items : [] }))
+      .then((res) => {
+        const items = Array.isArray(res) ? res : (res?.data ?? [])
+        return { items }
+      })
       .catch(() => ({ items: [] }))
   },
 

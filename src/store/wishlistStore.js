@@ -13,8 +13,14 @@ const useWishlistStore = create(
       fetchWishlist: async () => {
         if (USE_MOCK) return
         try {
-          const data = await wishlistService.getWishlist()
-          set({ items: data ?? [] })
+          const res = await wishlistService.getWishlist()
+          // API GET /wishlist trả về array sản phẩm trực tiếp hoặc { data: [...] }
+          const raw = Array.isArray(res) ? res : (res?.data ?? [])
+          // Normalize về shape { product } để dùng thống nhất trong store
+          const items = raw.map(item =>
+            item.product ? item : { product: item, pk_wishlist_id: item.pk_product_id }
+          )
+          set({ items })
         } catch {
           // silent
         }

@@ -19,21 +19,21 @@ export default function CheckoutPage() {
   const handleSubmit = async () => {
     setLoading(true)
     try {
+      const addr = orderData.address
+      const shipping_address = `${addr.street}, ${addr.commune}, ${addr.province}`
       const result = await orderService.create({
-        address_id: orderData.address.pk_address_id,
+        receiver: addr.receiver,
+        phone: addr.phone,
+        shipping_address,
         payment_method: orderData.paymentMethod,
         coupon_code: orderData.couponCode || undefined,
-        items: items.map(i => ({
-          product_id: i.product.pk_product_id,
-          variant_id: i.variant?.pk_variant_id || null,
-          quantity: i.quantity,
-        })),
       })
       clearCart()
-      if (result.payment_url) {
-        window.location.href = result.payment_url
+      const orderId = result?.data?.order_id ?? result?.order_id
+      if (result?.data?.payment_url ?? result?.payment_url) {
+        window.location.href = result?.data?.payment_url ?? result?.payment_url
       } else {
-        navigate(`/order/result?order_id=${result.order_id}`)
+        navigate(`/order/result?order_id=${orderId}`)
       }
     } catch (err) {
       alert(err?.message || 'Đặt hàng thất bại, vui lòng thử lại.')
