@@ -7,7 +7,7 @@ const SESSION_ID = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}
  * Ghi log hành vi người dùng — fire-and-forget, không throw lỗi
  * @param {object} params
  * @param {number} [params.product_id]
- * @param {'view_product'|'add_to_cart'|'search'|'add_to_wishlist'|'remove_from_wishlist'} params.action
+ * @param {'view'|'add_to_cart'|'search'|'add_to_wishlist'|'remove_from_wishlist'} params.action
  * @param {string} [params.search_query]
  * @param {number} [params.duration_sec]
  */

@@ -18,6 +18,47 @@ import ReviewSection from './components/ReviewSection'
 import ImageGallery from './components/ImageGallery'
 import ProductSpecs from './components/ProductSpecs'
 
+// Format mô tả sản phẩm: tiêu đề in hoa, bullet "-", đoạn văn thường
+function ProductDescription({ text }) {
+  if (!text) return null
+
+  // Tách theo: xuống dòng, hoặc trước dấu "- ", hoặc trước "Thông tin sản phẩm:"
+  const segments = text
+    .split(/(?=\n)|(?=\s*-\s+)|(?=Thông tin sản phẩm:)/g)
+    .map(s => s.replace(/^\n+/, '').trim())
+    .filter(Boolean)
+
+  return (
+    <div className="text-sm text-stone-600 leading-relaxed space-y-2">
+      {segments.map((seg, i) => {
+        // Section header: "Thông tin sản phẩm:" hoặc toàn chữ hoa dài > 4 ký tự
+        if (
+          /^Thông tin sản phẩm:/i.test(seg) ||
+          (/^[A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯẠ\s:,()/-]+$/.test(seg) && seg.length > 4)
+        ) {
+          const label = seg.replace(/^Thông tin sản phẩm:\s*/i, '')
+          return (
+            <p key={i} className="font-semibold text-stone-800 text-sm pt-2 first:pt-0 border-t border-stone-100 first:border-0">
+              {label || 'Thông tin sản phẩm'}
+            </p>
+          )
+        }
+        // Bullet point
+        if (/^-\s+/.test(seg)) {
+          return (
+            <div key={i} className="flex gap-2 items-start">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+              <span>{seg.replace(/^-\s+/, '')}</span>
+            </div>
+          )
+        }
+        // Đoạn văn thường
+        return <p key={i}>{seg}</p>
+      })}
+    </div>
+  )
+}
+
 export default function ProductDetailPage() {
   const { id } = useParams()
   const [product, setProduct] = useState(null)
@@ -49,7 +90,7 @@ export default function ProductDetailPage() {
         setSelectedVariant(product?.variants?.[0] || null)
         // Ghi log xem sản phẩm
         if (product?.pk_product_id) {
-          logBehavior({ product_id: product.pk_product_id, action: 'view_product' })
+          logBehavior({ product_id: product.pk_product_id, action: 'view' })
         }
       })
       .catch((err) => setError(err?.message || 'Không thể tải sản phẩm'))
@@ -242,8 +283,8 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         <div className="md:col-span-2">
           <h2 className="text-lg font-semibold mb-3">Mô tả sản phẩm</h2>
-          <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line card p-5">
-            {product.description}
+          <div className="card p-5">
+            <ProductDescription text={product.description} />
           </div>
         </div>
         {product.specs?.length > 0 && (

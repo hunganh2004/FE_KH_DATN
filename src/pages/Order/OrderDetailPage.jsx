@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { formatPrice, formatDateTime } from '@/utils/format'
 import { orderService } from '@/services/orderService'
+import { paymentService } from '@/services/paymentService'
+import { resolveImage } from '@/utils/image'
+import { RefreshCw } from 'lucide-react'
 
 const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipping', 'delivered']
 
@@ -18,12 +21,44 @@ export default function OrderDetailPage() {
   const { id } = useParams()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [itemImages, setItemImages] = useState({})
+  const [retrying, setRetrying] = useState(false)
+
+  const handleRetryPayment = async () => {
+    if (!order) return
+    setRetrying(true)
+    try {
+      const res = await paymentService.createVnpayUrl(order.pk_order_id)
+      const payUrl = res?.data?.pay_url ?? res?.pay_url
+      if (payUrl) window.location.href = payUrl
+    } catch (err) {
+      alert(err?.message || 'Không thể tạo link thanh toán. Vui lòng thử lại sau.')
+    } finally {
+      setRetrying(false)
+    }
+  }
 
   useEffect(() => {
     orderService.getDetail(id)
       .then((res) => {
         const order = res?.pk_order_id ? res : (res?.data ?? res)
         setOrder(order)
+        // Fetch ảnh song song cho tất cả items
+        if (order?.items?.length) {
+          const ids = [...new Set(order.items.map(i => i.fk_product_id).filter(Boolean))]
+          Promise.all(
+            ids.map(pid =>
+              fetch(`${import.meta.env.VITE_API_URL}/products/${pid}`)
+                .then(r => r.json())
+                .then(r => {
+                  const p = r?.data ?? r
+                  const img = p?.images?.find(i => i.is_primary)?.image_url || p?.images?.[0]?.image_url
+                  return [pid, img]
+                })
+                .catch(() => [pid, null])
+            )
+          ).then(entries => setItemImages(Object.fromEntries(entries)))
+        }
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -91,9 +126,16 @@ export default function OrderDetailPage() {
 
       {/* Items */}
       <div className="card p-4 mb-4 space-y-3">
-        {order.items?.map((item) => (
+        {order.items?.map((item) => {
+          const img = resolveImage(itemImages[item.fk_product_id])
+          return (
           <div key={item.pk_order_item_id} className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-stone-100 shrink-0 flex items-center justify-center text-xl">🐾</div>
+            <Link to={`/product/${item.fk_product_id}`} className="w-12 h-12 rounded-lg bg-stone-100 shrink-0 overflow-hidden flex items-center justify-center text-xl">
+              {img
+                ? <img src={img} alt={item.product_name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none' }} />
+                : '🐾'
+              }
+            </Link>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium line-clamp-1">{item.product_name}</p>
               <p className="text-xs text-stone-400">x{item.quantity}</p>
@@ -110,7 +152,8 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Summary */}
@@ -129,6 +172,18 @@ export default function OrderDetailPage() {
       {order.order_status === 'pending' && (
         <button onClick={handleCancel} className="btn-outline text-red-500 border-red-300 hover:bg-red-50 w-full py-2.5">
           Huỷ đơn hàng
+        </button>
+      )}
+
+      {/* Thanh toán lại — chỉ hiện khi VNPay chưa thanh toán và đơn chưa huỷ */}
+      {order.payment_method === 'vnpay' && order.payment_status !== 'paid' && !isCancelled && (
+        <button
+          onClick={handleRetryPayment}
+          disabled={retrying}
+          className="btn-primary flex items-center justify-center gap-2 w-full py-2.5 mt-3 disabled:opacity-50"
+        >
+          <RefreshCw size={16} className={retrying ? 'animate-spin' : ''} />
+          {retrying ? 'Đang xử lý...' : 'Thanh toán qua VNPay'}
         </button>
       )}
     </div>

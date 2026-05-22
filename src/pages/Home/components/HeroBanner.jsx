@@ -5,19 +5,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const SLIDES = [
   {
-    image: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1400&auto=format&fit=crop',
+    image: 'https://www.robins.vn/wp-content/uploads/2026/01/spa-thu-cung-1.jpg.webp.webp',
     title: 'Yêu thương thú cưng theo cách riêng',
     subtitle: 'Phụ kiện và đồ dùng chất lượng nhất cho những người bạn bốn chân của bạn.',
     cta: { label: 'Khám phá ngay', to: '/category/phu-kien' },
   },
   {
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=1400&auto=format&fit=crop',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR688d9gqG9vycm_6x07VhxVdt07QOxtHuKog&s',
     title: 'Chăm sóc sức khỏe toàn diện',
     subtitle: 'Thức ăn dinh dưỡng cao cấp giúp thú cưng luôn khỏe mạnh và tràn đầy năng lượng.',
     cta: { label: 'Xem thức ăn', to: '/category/thuc-an' },
   },
   {
-    image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=1400&auto=format&fit=crop',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyDLDJIEMyJTe--kkpj1oKl5gQXXUqe2L-sg&s',
     title: 'Phụ kiện thời trang sành điệu',
     subtitle: 'Làm mới phong cách cho thú cưng với những bộ sưu tập mới nhất tại PetShop.',
     cta: { label: 'Xem thời trang', to: '/category/thoi-trang' },
@@ -49,9 +49,11 @@ export default function HeroBanner() {
           <img
             src={SLIDES[current].image}
             alt={SLIDES[current].title}
-            className="w-full h-full object-cover opacity-55"
+            className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
+          {/* Gradient overlay đảm bảo text luôn đọc được */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
           <div className="absolute inset-0 flex items-center justify-center text-center px-4">
             <div className="max-w-3xl">
               <motion.h1

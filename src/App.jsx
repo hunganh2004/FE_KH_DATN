@@ -21,6 +21,8 @@ import WriteReviewPage from '@/pages/Order/WriteReviewPage'
 import ForgotPasswordPage from '@/pages/Auth/ForgotPasswordPage'
 import ResetPasswordPage from '@/pages/Auth/ResetPasswordPage'
 import NotFoundPage from '@/pages/NotFoundPage'
+import PaymentSuccessPage from '@/pages/Payment/PaymentSuccessPage'
+import PaymentFailedPage from '@/pages/Payment/PaymentFailedPage'
 
 export default function App() {
   return (
@@ -42,6 +44,8 @@ export default function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/result" element={<OrderResultPage />} />
+        <Route path="/payment/success" element={<PaymentSuccessPage />} />
+        <Route path="/payment/failed" element={<PaymentFailedPage />} />
         <Route path="/order/:id" element={<OrderDetailPage />} />
         <Route path="/order/:orderId/review/:productId" element={<WriteReviewPage />} />
 

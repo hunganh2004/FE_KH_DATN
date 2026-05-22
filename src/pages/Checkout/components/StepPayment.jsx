@@ -6,10 +6,27 @@ import { formatPrice } from '@/utils/format'
 import useCartStore, { calcCart } from '@/store/cartStore'
 
 const PAYMENT_METHODS = [
-  { value: 'cod',          label: 'Thanh toán khi nhận hàng (COD)', icon: '💵', available: true },
-  { value: 'bank_transfer',label: 'Chuyển khoản ngân hàng',         icon: '🏦', available: false },
-  { value: 'momo',         label: 'Ví MoMo',                        icon: '💜', available: false },
-  { value: 'vnpay',        label: 'VNPay',                          icon: '🔵', available: false },
+  { value: 'cod', label: 'Thanh toán khi nhận hàng (COD)', available: true,
+    icon: <span className="text-2xl">💵</span>,
+  },
+  { value: 'vnpay', label: 'VNPay', available: true,
+    icon: (
+      <svg viewBox="0 0 80 80" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="12" fill="#005BAA"/>
+        <text x="50%" y="54%" dominantBaseline="middle" textAnchor="middle"
+          fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">VNPay</text>
+      </svg>
+    ),
+  },
+  { value: 'momo', label: 'Ví MoMo', available: false,
+    icon: (
+      <svg viewBox="0 0 80 80" className="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="40" fill="#A50064"/>
+        <text x="50%" y="54%" dominantBaseline="middle" textAnchor="middle"
+          fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">MoMo</text>
+      </svg>
+    ),
+  },
 ]
 
 export default function StepPayment({ method, couponCode, onChange, onBack, onNext }) {
@@ -34,6 +51,7 @@ export default function StepPayment({ method, couponCode, onChange, onBack, onNe
       setCouponStatus('valid')
       setCouponInfo({ code: couponInput.trim(), discount_amount: data?.discount_amount })
       onChange('couponCode', couponInput.trim())
+      onChange('discountAmount', data?.discount_amount ?? 0)
     } catch {
       setCouponStatus('invalid')
       setCouponInfo(null)
@@ -48,6 +66,7 @@ export default function StepPayment({ method, couponCode, onChange, onBack, onNe
     setCouponStatus(null)
     setCouponInfo(null)
     onChange('couponCode', '')
+    onChange('discountAmount', 0)
   }
 
   return (
@@ -67,7 +86,9 @@ export default function StepPayment({ method, couponCode, onChange, onBack, onNe
               pm.available && method === pm.value ? 'border-emerald-500 bg-emerald-50' : 'border-transparent hover:border-stone-200'
             )}
           >
-            <span className="text-2xl">{pm.icon}</span>
+            <span className="w-8 h-8 flex items-center justify-center shrink-0">
+              {pm.icon}
+            </span>
             <span className="font-medium text-sm flex-1">{pm.label}</span>
             {!pm.available && (
               <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">Sắp ra mắt</span>

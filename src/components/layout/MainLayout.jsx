@@ -4,6 +4,7 @@ import Header from './Header'
 import Footer from './Footer'
 import { ToastContainer } from '@/components/ui/Toast'
 import useToastStore from '@/store/toastStore'
+import ChatWidget from '@/components/ui/ChatWidget'
 import useAuthStore from '@/store/authStore'
 import useWishlistStore from '@/store/wishlistStore'
 import useCartStore from '@/store/cartStore'
@@ -29,6 +30,7 @@ export default function MainLayout() {
       </main>
       <Footer />
       <ToastContainer toasts={toasts} onRemove={remove} />
+      <ChatWidget />
     </div>
   )
 }

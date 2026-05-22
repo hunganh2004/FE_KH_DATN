@@ -90,7 +90,7 @@ export default function NotificationsPage() {
           ) : notifications.length === 0 ? (
             <p className="text-stone-400 text-center py-12">Không có thông báo nào.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 styled-scrollbar">
               {notifications.map((notif) => {
                 const cfg = TYPE_CONFIG[notif.type] || TYPE_CONFIG.system
                 const Icon = cfg.icon

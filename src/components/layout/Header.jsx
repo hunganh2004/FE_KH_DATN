@@ -241,26 +241,6 @@ export default function Header() {
                 </div>
               </div>
             </li>
-
-            <li className="w-px h-4 bg-stone-200 mx-1 shrink-0" />
-
-            {/* Loại thú cưng */}
-            <li className="relative group">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors">
-                <span>Loại thú cưng</span>
-                <ChevronDown size={14} className="text-stone-400 group-hover:text-emerald-500 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-              <div className="absolute top-full left-0 mt-0.5 min-w-[160px] bg-white border border-stone-100 rounded-xl shadow-xl py-1.5
-                              opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                              transition-all duration-150 translate-y-1 group-hover:translate-y-0 z-50">
-                {petTypes.map((pet) => (
-                  <Link key={pet.pk_pet_type_id} to={`/search?pet_type=${pet.pk_pet_type_id}`}
-                    className="flex items-center px-4 py-2 text-sm text-stone-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
-                    {pet.name}
-                  </Link>
-                ))}
-              </div>
-            </li>
           </ul>
         </div>
       </nav>
@@ -295,13 +275,6 @@ export default function Header() {
             )
           })}
           <div className="border-t border-stone-100 my-2" />
-          <p className="px-3 py-1 text-xs font-semibold text-stone-400 uppercase tracking-wider">Loại thú cưng</p>
-          {petTypes.map((pet) => (
-            <Link key={pet.pk_pet_type_id} to={`/search?pet_type=${pet.pk_pet_type_id}`} onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm text-stone-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
-              {pet.name}
-            </Link>
-          ))}
         </div>
       )}
     </header>

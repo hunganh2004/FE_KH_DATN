@@ -12,7 +12,9 @@ const METHOD_LABELS = {
 
 export default function StepConfirm({ orderData, items, loading, onBack, onSubmit }) {
   const { items: cartItems } = useCartStore()
-  const { subtotal, shippingFee, total } = calcCart(cartItems)
+  const { subtotal, shippingFee } = calcCart(cartItems)
+  const discount = orderData.discountAmount ?? 0
+  const total = subtotal + shippingFee - discount
 
   return (
     <div>
@@ -57,6 +59,12 @@ export default function StepConfirm({ orderData, items, loading, onBack, onSubmi
             : <span>{formatPrice(shippingFee)}</span>
           }
         </div>
+        {discount > 0 && (
+          <div className="flex justify-between text-emerald-600">
+            <span>Giảm giá {orderData.couponCode && `(${orderData.couponCode})`}</span>
+            <span>-{formatPrice(discount)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-stone-600">
           <span>Thanh toán</span><span>{METHOD_LABELS[orderData.paymentMethod]}</span>
         </div>

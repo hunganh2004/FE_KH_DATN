@@ -27,3 +27,18 @@
     @apply bg-white rounded-xl shadow-sm border border-stone-100;
   }
 }
+
+/* Scrollbar tùy chỉnh */
+.styled-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d6d3d1;
+  border-radius: 9999px;
+}
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a29e;
+}

@@ -6,12 +6,13 @@ import StepPayment from './components/StepPayment'
 import StepConfirm from './components/StepConfirm'
 import useCartStore from '@/store/cartStore'
 import { orderService } from '@/services/orderService'
+import { paymentService } from '@/services/paymentService'
 
 const STEPS = ['Địa chỉ giao hàng', 'Thanh toán', 'Xác nhận']
 
 export default function CheckoutPage() {
   const [step, setStep] = useState(0)
-  const [orderData, setOrderData] = useState({ address: null, paymentMethod: 'cod', couponCode: '' })
+  const [orderData, setOrderData] = useState({ address: null, paymentMethod: 'cod', couponCode: '', discountAmount: 0 })
   const [loading, setLoading] = useState(false)
   const { items, clearCart } = useCartStore()
   const navigate = useNavigate()
@@ -28,13 +29,21 @@ export default function CheckoutPage() {
         payment_method: orderData.paymentMethod,
         coupon_code: orderData.couponCode || undefined,
       })
-      clearCart()
+
       const orderId = result?.data?.order_id ?? result?.order_id
-      if (result?.data?.payment_url ?? result?.payment_url) {
-        window.location.href = result?.data?.payment_url ?? result?.payment_url
-      } else {
-        navigate(`/order/result?order_id=${orderId}`)
+      clearCart()
+
+      // VNPay: gọi thêm để lấy pay_url rồi redirect
+      if (orderData.paymentMethod === 'vnpay') {
+        const vnpay = await paymentService.createVnpayUrl(orderId)
+        const payUrl = vnpay?.data?.pay_url ?? vnpay?.pay_url
+        if (payUrl) {
+          window.location.href = payUrl
+          return
+        }
       }
+
+      navigate(`/order/result?order_id=${orderId}`)
     } catch (err) {
       alert(err?.message || 'Đặt hàng thất bại, vui lòng thử lại.')
     } finally {
