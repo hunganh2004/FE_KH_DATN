@@ -3,8 +3,15 @@ import { X } from 'lucide-react'
 import { addressService } from '@/services/addressService'
 
 const PROVINCES = [
-  'TP. Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng',
-  'Bình Dương', 'Đồng Nai', 'An Giang', 'Khánh Hoà', 'Lâm Đồng',
+  // 6 Thành phố trực thuộc TW
+  'TP. Hà Nội', 'TP. Hải Phòng', 'TP. Đà Nẵng', 'TP. Huế', 'TP. Hồ Chí Minh', 'TP. Cần Thơ',
+  // 28 Tỉnh
+  'Tuyên Quang', 'Lào Cai', 'Thái Nguyên', 'Phú Thọ', 'Bắc Ninh',
+  'Hưng Yên', 'Ninh Bình', 'Quảng Trị', 'Quảng Ngãi', 'Gia Lai',
+  'Khánh Hòa', 'Lâm Đồng', 'Đắk Lắk', 'Đồng Nai', 'Tây Ninh',
+  'Vĩnh Long', 'Đồng Tháp', 'Cà Mau', 'An Giang',
+  'Thanh Hóa', 'Nghệ An', 'Hà Tĩnh', 'Lạng Sơn', 'Hà Giang',
+  'Lai Châu', 'Điện Biên', 'Quảng Ninh', 'Sơn La',
 ]
 
 const EMPTY = { receiver: '', phone: '', province: '', commune: '', street: '', is_default: 0 }

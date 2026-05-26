@@ -25,9 +25,12 @@ export default function AccountSidebar() {
     <aside className="w-full md:w-56 shrink-0">
       {/* User info */}
       <div className="flex items-center gap-3 mb-6 p-4 card">
-        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
-          {user?.full_name?.[0] || '?'}
-        </div>
+        {user?.avatar_url
+          ? <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+          : <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold shrink-0">
+              {user?.full_name?.[0] || '?'}
+            </div>
+        }
         <div className="min-w-0">
           <p className="font-semibold text-sm truncate">{user?.full_name}</p>
           <p className="text-xs text-stone-400 truncate">{user?.email}</p>

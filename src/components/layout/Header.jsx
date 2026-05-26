@@ -65,12 +65,12 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-emerald-700 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center gap-4 h-16">
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-[22px] shrink-0">🐕</div>
-            <span className="text-xl font-bold tracking-tight text-emerald-500 hidden sm:block">PetShop</span>
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-[22px] shrink-0">🐕</div>
+            <span className="text-xl font-bold tracking-tight text-white hidden sm:block">PetShop</span>
           </Link>
 
           <div ref={searchRef} className="flex-1 max-w-xl hidden md:block relative">
@@ -82,15 +82,15 @@ export default function Header() {
                   onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true) }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Tìm kiếm sản phẩm, thương hiệu..."
-                  className="input-base pr-10"
+                  className="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/25 focus:border-white/40 pr-10"
                 />
                 {searchQuery ? (
                   <button type="button" onClick={() => { setSearchQuery(''); setShowSuggestions(false) }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white">
                     <X size={16} />
                   </button>
                 ) : (
-                  <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-emerald-500">
+                  <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white">
                     <Search size={18} />
                   </button>
                 )}
@@ -128,7 +128,7 @@ export default function Header() {
           <div className="flex items-center gap-1 ml-auto">
             {user ? (
               <>
-                <Link to="/account/notifications" className="relative p-2 text-stone-600 hover:text-emerald-500 rounded-full hover:bg-stone-100">
+                <Link to="/account/notifications" className="relative p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10">
                   <Bell size={22} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-bold px-0.5">
@@ -136,7 +136,7 @@ export default function Header() {
                     </span>
                   )}
                 </Link>
-                <Link to="/account/wishlist" className="relative p-2 text-stone-600 hover:text-emerald-500 rounded-full hover:bg-stone-100 hidden sm:flex">
+                <Link to="/account/wishlist" className="relative p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 hidden sm:flex">
                   <Heart size={22} />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-bold px-0.5">
@@ -144,26 +144,26 @@ export default function Header() {
                     </span>
                   )}
                 </Link>
-                <Link to="/account" className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-stone-100 text-stone-600 hover:text-emerald-500">
+                <Link to="/account" className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-white/10 text-white/80 hover:text-white">
                   {user.avatar_url
                     ? <img src={user.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
-                    : <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">{user.full_name?.[0]}</div>
+                    : <div className="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-bold">{user.full_name?.[0]}</div>
                   }
                   <span className="text-sm font-medium hidden sm:block">{user.full_name?.split(' ').pop()}</span>
                 </Link>
               </>
             ) : (
-              <Link to="/login" className="btn-primary text-sm py-1.5 px-4">Đăng nhập</Link>
+              <Link to="/login" className="bg-white text-emerald-700 font-bold text-sm py-1.5 px-4 rounded-lg hover:bg-emerald-50 transition-colors">Đăng nhập</Link>
             )}
-            <Link to="/cart" className="relative p-2 text-stone-600 hover:text-emerald-500 rounded-full hover:bg-stone-100">
+            <Link to="/cart" className="relative p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10">
               <ShoppingCart size={22} />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-emerald-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
               )}
             </Link>
-            <button className="p-2 text-stone-600 md:hidden rounded-full hover:bg-stone-100" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="p-2 text-white/80 hover:text-white md:hidden rounded-full hover:bg-white/10" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
@@ -173,8 +173,9 @@ export default function Header() {
           <form onSubmit={handleSearch}>
             <div className="relative">
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm sản phẩm..." className="input-base pr-10" />
-              <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400">
+                placeholder="Tìm kiếm sản phẩm..."
+                className="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/25 pr-10" />
+              <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60">
                 <Search size={18} />
               </button>
             </div>
@@ -182,26 +183,26 @@ export default function Header() {
         </div>
       </div>
 
-      <nav className="border-t border-stone-100 hidden md:block">
+      <nav className="border-t border-white/10 hidden md:block">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center h-10 gap-0.5">
             <li>
               <NavLink to="/" end className={({ isActive }) =>
-                `px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isActive ? 'text-emerald-600 bg-emerald-50' : 'text-stone-600 hover:text-emerald-600 hover:bg-stone-50'}`
+                `px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isActive ? 'text-white bg-white/20' : 'text-white/80 hover:text-white hover:bg-white/10'}`
               }>Trang chủ</NavLink>
             </li>
             <li>
               <NavLink to="/search" className={({ isActive }) =>
-                `px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isActive ? 'text-emerald-600 bg-emerald-50' : 'text-stone-600 hover:text-emerald-600 hover:bg-stone-50'}`
+                `px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isActive ? 'text-white bg-white/20' : 'text-white/80 hover:text-white hover:bg-white/10'}`
               }>Tất cả sản phẩm</NavLink>
             </li>
-            <li className="w-px h-4 bg-stone-200 mx-1 shrink-0" />
+            <li className="w-px h-4 bg-white/20 mx-1 shrink-0" />
 
             {/* Danh mục — Mega Menu */}
             <li className="relative group">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-lg transition-colors">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                 <span>Danh mục</span>
-                <ChevronDown size={14} className="text-stone-400 group-hover:text-emerald-500 group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown size={14} className="text-white/60 group-hover:text-white group-hover:rotate-180 transition-transform duration-200" />
               </button>
               <div className="absolute top-full left-0 mt-0.5 w-[640px] bg-white border border-stone-100 rounded-2xl shadow-2xl py-5 px-6
                               opacity-0 invisible group-hover:opacity-100 group-hover:visible
@@ -246,35 +247,35 @@ export default function Header() {
       </nav>
 
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-stone-100 bg-white px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
+        <div className="md:hidden border-t border-white/10 bg-emerald-700 px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
           <Link to="/" onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white rounded-lg">
             🏠 Trang chủ
           </Link>
           <Link to="/search" onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white rounded-lg">
             🔍 Tất cả sản phẩm
           </Link>
-          <div className="border-t border-stone-100 my-2" />
+          <div className="border-t border-white/10 my-2" />
           {parentCats.map((cat) => {
             const children = childMap[cat.pk_category_id] || []
             const icon = CAT_ICONS[cat.slug] || '📦'
             return (
               <div key={cat.slug}>
                 <Link to={`/category/${cat.slug}`} onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-stone-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-white/90 hover:bg-white/10 hover:text-white rounded-lg">
                   <span>{icon}</span>{cat.name}
                 </Link>
                 {children.map(child => (
                   <Link key={child.slug} to={`/category/${child.slug}`} onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 pl-9 pr-3 py-2 text-sm text-stone-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg">
+                    className="flex items-center gap-3 pl-9 pr-3 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white rounded-lg">
                     {child.name}
                   </Link>
                 ))}
               </div>
             )
           })}
-          <div className="border-t border-stone-100 my-2" />
+          <div className="border-t border-white/10 my-2" />
         </div>
       )}
     </header>
