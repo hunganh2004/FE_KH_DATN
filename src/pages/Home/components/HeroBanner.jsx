@@ -8,19 +8,19 @@ const SLIDES = [
     image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1600&auto=format&fit=crop&q=80',
     title: 'Yêu thương thú cưng theo cách riêng',
     subtitle: 'Phụ kiện và đồ dùng chất lượng nhất cho những người bạn bốn chân của bạn.',
-    cta: { label: 'Khám phá ngay', to: '/category/phu-kien' },
+    cta: { label: 'Khám phá ngay', to: '/search?q=ph%E1%BB%A5+ki%E1%BB%87n' },
   },
   {
     image: 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=1600&auto=format&fit=crop&q=80',
     title: 'Chăm sóc sức khỏe toàn diện',
     subtitle: 'Thức ăn dinh dưỡng cao cấp giúp thú cưng luôn khỏe mạnh và tràn đầy năng lượng.',
-    cta: { label: 'Xem thức ăn', to: '/category/thuc-an' },
+    cta: { label: 'Xem thức ăn', to: '/search?q=th%E1%BB%A9c+%C4%83n' },
   },
   {
     image: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1600&auto=format&fit=crop&q=80',
     title: 'Phụ kiện thời trang sành điệu',
     subtitle: 'Làm mới phong cách cho thú cưng với những bộ sưu tập mới nhất tại PetShop.',
-    cta: { label: 'Xem thời trang', to: '/category/thoi-trang' },
+    cta: { label: 'Xem thời trang', to: '/search?q=th%E1%BB%9Di+trang' },
   },
 ]
 

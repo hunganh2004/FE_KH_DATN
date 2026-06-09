@@ -248,7 +248,7 @@ export default function ChatWidget() {
           )}
 
           {/* Input */}
-          <div className="px-3 py-3 border-t border-stone-100 shrink-0">
+          <div className="px-3 pt-3 pb-2 border-t border-stone-100 shrink-0">
             <div className="flex gap-2 items-end">
               <textarea
                 ref={inputRef}
@@ -270,6 +270,16 @@ export default function ChatWidget() {
               </button>
             </div>
             <p className="text-[10px] text-stone-400 mt-1.5 text-center">Enter để gửi · Shift+Enter xuống dòng</p>
+            {/* Thông tin liên hệ */}
+            <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-center gap-3 text-[10px] text-stone-400">
+              <span>Cần hỗ trợ thêm?</span>
+              <a href="tel:1800xxxx" className="flex items-center gap-1 hover:text-emerald-600 transition-colors">
+                📞 0865 713 676
+              </a>
+              <a href="mailto:support@petshop.vn" className="flex items-center gap-1 hover:text-emerald-600 transition-colors">
+                ✉️ support@petshop.vn
+              </a>
+            </div>
           </div>
         </div>
       )}
